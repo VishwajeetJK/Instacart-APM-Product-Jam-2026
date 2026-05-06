@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ic-green-deep: #0a4525;
+  --ic-orange: #ff7009;
+  --ic-orange-soft: #f5c8a4;
+  --ic-cream: #faf1e5;
+  --ic-cream-2: #f5edd8;
+  --ic-green-soft: #d4ecc9;
+  --ic-text: #0a4525;
+  --ic-text-mute: #4a6b57;
+  --ic-border: #d9d2c0;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply m-0 bg-ic-cream font-sans text-ic-text antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+  /* Inter with tabular numerals — for any place we want aligned digits.
+     We aliased font-mono → Inter in the Tailwind config, so .font-mono
+     here means "Inter with monospaced numerals" — keeping the brand
+     consistent while preserving column alignment in tables. */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Connected-Commerce flywheel — slow continuous rotation
+   of the dashed track conveys the "loop" without rotating labels. */
+@keyframes cd-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.cd-flywheel-ring {
+  transform-origin: 50% 50%;
+  transform-box: fill-box;
+  animation: cd-spin 28s linear infinite;
+}
+
+@keyframes cd-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+.cd-flywheel-arrow {
+  animation: cd-pulse 4s ease-in-out infinite;
+}
+
+@layer components {
+  .section-shell {
+    @apply mx-auto max-w-7xl px-6 py-20 md:px-10;
+  }
+  .section-alt {
+    @apply bg-ic-cream2;
+  }
+  .pill {
+    @apply inline-flex rounded-full bg-ic-orangeSoft px-3 py-1 text-xs font-bold uppercase tracking-[0.08em] text-ic-greenDeep;
+  }
+  .chip {
+    @apply inline-flex rounded-full px-3 py-1 text-xs font-semibold;
+  }
+  .chip-green {
+    @apply bg-ic-greenSoft text-ic-greenDeep;
+  }
+  .chip-peach {
+    @apply bg-ic-orangeSoft text-ic-greenDeep;
+  }
+  .card {
+    @apply rounded-3xl border border-ic-border bg-white p-6 shadow-sm;
+  }
+  .card-title {
+    @apply text-xl font-bold text-ic-greenDeep;
+  }
+  .card-body {
+    @apply mt-2 text-sm leading-relaxed text-ic-textMute;
+  }
+  .card-list {
+    @apply mt-3 space-y-2 text-sm leading-relaxed text-ic-textMute;
+  }
+  .dot-accent {
+    @apply absolute -right-8 -top-8 h-48 w-48 rounded-full opacity-50;
+    background-image: radial-gradient(rgba(10, 69, 37, 0.22) 1.1px, transparent 1.1px);
+    background-size: 10px 10px;
+  }
+}
