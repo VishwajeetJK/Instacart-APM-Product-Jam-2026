@@ -1511,10 +1511,35 @@ function PilotPlan() {
           <Card>
             <h3 className="flex items-center gap-2 text-lg font-extrabold text-ic-greenDeep"><LineChart className="h-5 w-5" /> Honest order funnel</h3>
             <div className="mt-4 space-y-2">
-              <FunnelStep label={`${PILOT_ORDERS_PER_STORE_PER_DAY} orders per store per day`} sub="Instacart baseline" pct={1} />
-              <FunnelStep label={`× ${fmtPct(PILOT_ROBOT_ELIGIBLE_PCT)} robot-eligible`} sub="weight + distance + no alcohol → 10 eligible" pct={0.7} />
-              <FunnelStep label={`× ${fmtPct(PILOT_OPT_IN_PCT)} opt-in (conservative)`} sub={`→ ${(PILOT_ORDERS_PER_STORE_PER_DAY * PILOT_ROBOT_ELIGIBLE_PCT * PILOT_OPT_IN_PCT).toFixed(1)} robot orders per store per day`} pct={0.4} />
-              <FunnelStep label={`× ${PILOT_STORES} stores × ${PILOT_DAYS} days`} sub={`→ ~${Math.round(PILOT_TOTAL_ORDERS)} total robot orders`} pct={0.25} dark />
+              <FunnelStep
+                label={`${PILOT_ORDERS_PER_STORE_PER_DAY} orders per store per day`}
+                sub="Instacart baseline"
+                pct={1}
+                calcTitle="Starting baseline"
+                calc="This is the full order pool before any eligibility or opt-in filters are applied."
+              />
+              <FunnelStep
+                label={`× ${fmtPct(PILOT_ROBOT_ELIGIBLE_PCT)} robot-eligible`}
+                sub="weight + distance + no alcohol → 10 eligible"
+                pct={PILOT_ROBOT_ELIGIBLE_PCT}
+                calcTitle="After eligibility filter"
+                calc={`50 × ${fmtPct(PILOT_ROBOT_ELIGIBLE_PCT)} = ${(PILOT_ORDERS_PER_STORE_PER_DAY * PILOT_ROBOT_ELIGIBLE_PCT).toFixed(0)} eligible orders per store per day.`}
+              />
+              <FunnelStep
+                label={`× ${fmtPct(PILOT_OPT_IN_PCT)} opt-in (conservative)`}
+                sub={`→ ${(PILOT_ORDERS_PER_STORE_PER_DAY * PILOT_ROBOT_ELIGIBLE_PCT * PILOT_OPT_IN_PCT).toFixed(1)} robot orders per store per day`}
+                pct={PILOT_ROBOT_ELIGIBLE_PCT * PILOT_OPT_IN_PCT}
+                calcTitle="After customer opt-in"
+                calc={`${(PILOT_ORDERS_PER_STORE_PER_DAY * PILOT_ROBOT_ELIGIBLE_PCT).toFixed(0)} × ${fmtPct(PILOT_OPT_IN_PCT)} = ${(PILOT_ORDERS_PER_STORE_PER_DAY * PILOT_ROBOT_ELIGIBLE_PCT * PILOT_OPT_IN_PCT).toFixed(1)} robot orders per store per day.`}
+              />
+              <FunnelStep
+                label={`× ${PILOT_STORES} stores × ${PILOT_DAYS} days`}
+                sub={`→ ~${Math.round(PILOT_TOTAL_ORDERS)} total robot orders`}
+                pct={PILOT_TOTAL_ORDERS / (PILOT_ORDERS_PER_STORE_PER_DAY * PILOT_STORES * PILOT_DAYS)}
+                dark
+                calcTitle="Pilot total math"
+                calc={`${(PILOT_ORDERS_PER_STORE_PER_DAY * PILOT_ROBOT_ELIGIBLE_PCT * PILOT_OPT_IN_PCT).toFixed(1)} × ${PILOT_STORES} × ${PILOT_DAYS} = ${Math.round(PILOT_TOTAL_ORDERS)} orders.`}
+              />
             </div>
             <div className="mt-3 rounded-xl bg-ic-orangeSoft p-3 text-xs text-ic-greenDeep">
               <strong>{Math.round(PILOT_TOTAL_ORDERS)} orders is directional learning, not statistical proof.</strong> This pilot optimizes for <em>learning velocity</em>, not conversion lift.
@@ -1548,12 +1573,38 @@ function PilotPlan() {
   )
 }
 
-function FunnelStep({ label, sub, pct, dark }: { label: string; sub: string; pct: number; dark?: boolean }) {
+function FunnelStep({
+  label,
+  sub,
+  pct,
+  dark,
+  calcTitle,
+  calc,
+}: {
+  label: string
+  sub: string
+  pct: number
+  dark?: boolean
+  calcTitle: string
+  calc: string
+}) {
   return (
     <div className={`rounded-xl border ${dark ? 'border-ic-greenDeep bg-ic-greenDeep text-white' : 'border-ic-border bg-ic-cream2'} p-3`}>
       <div className={`flex items-baseline justify-between text-sm font-bold ${dark ? 'text-white' : 'text-ic-greenDeep'}`}>
         <span>{label}</span>
-        <span className={`font-mono text-xs ${dark ? 'text-ic-orangeSoft' : 'text-ic-orange'}`}>{Math.round(pct * 100)}%</span>
+        <span className="group relative inline-flex">
+          <button
+            type="button"
+            className={`font-mono text-xs underline decoration-dotted underline-offset-2 ${dark ? 'text-ic-orangeSoft' : 'text-ic-orange'}`}
+            aria-label={`Show calculation for ${Math.round(pct * 100)} percent`}
+          >
+            {Math.round(pct * 100)}%
+          </button>
+          <span className="pointer-events-none invisible absolute right-0 top-full z-20 mt-2 w-64 rounded-xl border border-ic-border bg-white p-2 text-left opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+            <span className="block text-[10px] font-bold uppercase tracking-wide text-ic-orange">{calcTitle}</span>
+            <span className="mt-1 block text-[11px] font-normal leading-snug text-ic-greenDeep">{calc}</span>
+          </span>
+        </span>
       </div>
       <div className={`mt-1 text-[11px] ${dark ? 'text-white/80' : 'text-ic-textMute'}`}>{sub}</div>
     </div>
@@ -1662,7 +1713,7 @@ function Closing() {
         </div>
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <a href="#hero" className="inline-flex items-center gap-2 rounded-full border-2 border-ic-greenDeep px-5 py-2.5 text-sm font-bold text-ic-greenDeep transition hover:bg-ic-greenDeep hover:text-white">
+          <a href="#home" className="inline-flex items-center gap-2 rounded-full border-2 border-ic-greenDeep px-5 py-2.5 text-sm font-bold text-ic-greenDeep transition hover:bg-ic-greenDeep hover:text-white">
             Back to top
           </a>
           <a href="#opportunity" className="inline-flex items-center gap-2 rounded-full bg-ic-orange px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90">
