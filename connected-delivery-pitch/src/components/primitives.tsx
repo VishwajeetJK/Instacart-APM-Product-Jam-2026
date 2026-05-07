@@ -49,11 +49,17 @@ export function KPI({
   }
   const valueColor = variant === 'dark' ? 'text-white' : 'text-ic-greenDeep'
   const labelColor = variant === 'dark' ? 'text-white/70' : 'text-ic-textMute'
+  const explanation = `${label}: ${value}${sub ? `. ${sub}` : ''}`
 
   return (
     <div className={`rounded-2xl border-2 p-5 shadow-sm ${styles[variant]}`}>
       <div className={`text-xs font-semibold uppercase tracking-wider ${labelColor}`}>{label}</div>
-      <div className={`mt-2 text-3xl font-extrabold leading-tight ${valueColor} md:text-4xl`}>{value}</div>
+      <div className="group relative mt-2 inline-block">
+        <div className={`text-3xl font-extrabold leading-tight ${valueColor} md:text-4xl`}>{value}</div>
+        <span className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-72 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+          {explanation}
+        </span>
+      </div>
       {sub && <div className={`mt-1 text-xs ${labelColor}`}>{sub}</div>}
     </div>
   )

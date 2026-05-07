@@ -9,6 +9,12 @@ export function AdcsTrajectory() {
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-ic-orange">North Star Trajectory</p>
           <h3 className="mt-1 text-xl font-extrabold text-ic-greenDeep">Autonomous Deliveries per Connected Store per Day at or below $4.72 net cost</h3>
+          <p className="mt-1 max-w-3xl text-xs text-ic-textMute">
+            Meaning: for each Connected Store, we track how many robot deliveries are completed per day while keeping net delivery cost per order at or below $4.72.
+          </p>
+          <p className="mt-1 max-w-3xl text-xs text-ic-textMute">
+            Why this is the North Star: it combines <strong>scale</strong> (deliveries per store per day) with <strong>unit economics</strong> (cost at or below $4.72) in one metric, so growth only counts when it is economically sustainable.
+          </p>
         </div>
         <div className="text-xs text-ic-textMute">
           Pilot · Scale · Steady-state milestones

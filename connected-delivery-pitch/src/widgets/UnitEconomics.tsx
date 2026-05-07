@@ -140,14 +140,24 @@ export function UnitEconomics() {
           <div className="col-span-2 mt-1 grid grid-cols-2 gap-3 border-t border-ic-border pt-3">
             <div>
               <div className="text-xs font-semibold uppercase text-ic-textMute">Total per order</div>
-              <div className="font-mono text-3xl font-extrabold text-ic-greenDeep">
-                <SoftSpring value={live.total} format={(v) => `$${v.toFixed(2)}`} />
+              <div className="group relative inline-block">
+                <div className="font-mono text-3xl font-extrabold text-ic-greenDeep">
+                  <SoftSpring value={live.total} format={(v) => `$${v.toFixed(2)}`} />
+                </div>
+                <span className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-72 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
+                  Total per order: robot + remote operations + maintenance + loading = ${live.total.toFixed(2)}.
+                </span>
               </div>
             </div>
             <div>
               <div className="text-xs font-semibold uppercase text-ic-textMute">Savings versus $10.10</div>
-              <div className={`font-mono text-3xl font-extrabold ${live.savings >= 0.5 ? 'text-ic-greenDeep' : live.savings >= 0.3 ? 'text-ic-orange' : 'text-red-600'}`}>
-                <SoftSpring value={live.savings} format={(v) => `${(v * 100).toFixed(0)} percent`} />
+              <div className="group relative inline-block">
+                <div className={`font-mono text-3xl font-extrabold ${live.savings >= 0.5 ? 'text-ic-greenDeep' : live.savings >= 0.3 ? 'text-ic-orange' : 'text-red-600'}`}>
+                  <SoftSpring value={live.savings} format={(v) => `${(v * 100).toFixed(0)} percent`} />
+                </div>
+                <span className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-72 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
+                  Savings = (($${HUMAN_COURIER_COST.toFixed(2)} - $${live.total.toFixed(2)}) / $${HUMAN_COURIER_COST.toFixed(2)}) = {(live.savings * 100).toFixed(1)} percent.
+                </span>
               </div>
             </div>
           </div>
@@ -193,9 +203,12 @@ export function UnitEconomics() {
 
 function Mini({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <div className="group relative">
       <div className="text-[10px] font-semibold uppercase tracking-wider text-ic-textMute">{label}</div>
       <div className="font-mono text-base font-bold text-ic-greenDeep">{value}</div>
+      <span className="pointer-events-none invisible absolute left-0 top-full z-20 mt-1 w-56 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
+        {label}: {value}
+      </span>
     </div>
   )
 }
@@ -207,7 +220,12 @@ function Pill2({ color, label, sub }: { color: string; label: string; sub: strin
         <span className="inline-block h-2 w-2 rounded-full" style={{ background: color }} />
         {label}
       </div>
-      <div className="text-[10px] text-ic-textMute">{sub}</div>
+      <div className="group relative">
+        <div className="text-[10px] text-ic-textMute">{sub}</div>
+        <span className="pointer-events-none invisible absolute left-1/2 top-full z-20 mt-1 w-56 -translate-x-1/2 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
+          {label}: {sub}
+        </span>
+      </div>
     </div>
   )
 }

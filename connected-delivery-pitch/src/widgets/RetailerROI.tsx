@@ -213,11 +213,17 @@ function BigKPI({
     default: 'border-ic-border bg-white text-ic-greenDeep',
   }
   const muted = color === 'dark' ? 'text-white/70' : 'text-ic-textMute'
+  const explanation = `${label}: ${format(value)}. ${subtext}`
   return (
     <div className={`rounded-2xl border-2 p-5 shadow-sm ${styles[color]}`}>
       <div className={`text-xs font-bold uppercase tracking-wider ${muted}`}>{label}</div>
-      <div className={`mt-2 font-mono text-4xl font-extrabold leading-tight md:text-5xl`}>
-        <SoftSpring value={value} format={format} />
+      <div className="group relative mt-2 inline-block">
+        <div className={`font-mono text-4xl font-extrabold leading-tight md:text-5xl`}>
+          <SoftSpring value={value} format={format} />
+        </div>
+        <span className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-72 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+          {explanation}
+        </span>
       </div>
       <div className={`mt-2 text-[11px] ${muted}`}>{subtext}</div>
     </div>
@@ -315,7 +321,12 @@ export function LiveRetailerDashboard() {
             </ResponsiveContainer>
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <div className="font-mono text-2xl font-extrabold text-ic-orange">{fmtPct(r.robotOptInPct)}</div>
+                <div className="group relative inline-block">
+                  <div className="font-mono text-2xl font-extrabold text-ic-orange">{fmtPct(r.robotOptInPct)}</div>
+                  <span className="pointer-events-none invisible absolute left-1/2 top-full z-20 mt-2 w-72 -translate-x-1/2 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
+                    Robot opt-in rate: {fmtPct(r.robotOptInPct)} of eligible orders currently select robot delivery.
+                  </span>
+                </div>
                 <div className="text-[10px] uppercase tracking-wider text-ic-textMute">opt-in</div>
               </div>
             </div>
@@ -331,10 +342,16 @@ export function LiveRetailerDashboard() {
 }
 
 function DashKPI({ label, value, delta }: { label: string; value: string; delta: string }) {
+  const explanation = `${label}: ${value}. ${delta}`
   return (
     <div className="rounded-xl border border-ic-border bg-white p-3 shadow-sm">
       <div className="text-[10px] font-semibold uppercase tracking-wider text-ic-textMute">{label}</div>
-      <div className="mt-1 font-mono text-xl font-extrabold text-ic-greenDeep">{value}</div>
+      <div className="group relative mt-1 inline-block">
+        <div className="font-mono text-xl font-extrabold text-ic-greenDeep">{value}</div>
+        <span className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-72 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
+          {explanation}
+        </span>
+      </div>
       <div className="text-[10px] text-ic-textMute">{delta}</div>
     </div>
   )

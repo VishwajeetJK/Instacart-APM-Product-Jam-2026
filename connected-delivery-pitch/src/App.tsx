@@ -48,6 +48,8 @@ import {
   PILOT_STORES,
   PILOT_STORES_LIST,
   PILOT_TOTAL_ORDERS,
+  RETAILER_CAPER_CONTINUITY_RATE,
+  RETAILER_DEFAULTS,
   RETAILER_PARTNERS,
   RETAILER_SAVINGS_PER_ORDER,
   RETAILER_STORE_COUNT,
@@ -94,6 +96,8 @@ const links = [
   ['#wireframes', 'UI'],
 ] as const
 const ASSET_BASE = import.meta.env.BASE_URL
+const ROBOT_472_BREAKDOWN_INLINE =
+  'Base $4.72 components: capex/depreciation ~$0.36 + charging $0.60 + remote operations $1.04 + maintenance $0.75 + loading labor $0.77 + buffer/dispatch/misc ~$1.20.'
 
 // ============================================================
 // App
@@ -308,7 +312,7 @@ function HeroSavingsTooltip() {
       <span
         id={tipId}
         role="tooltip"
-        className="pointer-events-none invisible absolute left-1/2 top-full z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 rounded-xl border-2 border-ic-greenDeep/15 bg-white px-3 py-2.5 text-left font-sans shadow-lg opacity-0 transition-opacity duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+        className="pointer-events-none invisible absolute left-1/2 top-full z-50 mt-2 w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2 rounded-xl border-2 border-ic-greenDeep/15 bg-white px-3 py-2.5 text-left font-sans shadow-lg opacity-0 transition-opacity duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
       >
         <div className="text-[10px] font-bold uppercase tracking-wide text-ic-orange">How we got {pctRounded}%</div>
         <div className="mt-2 space-y-2 text-[11px] leading-snug text-ic-textMute">
@@ -322,12 +326,18 @@ function HeroSavingsTooltip() {
             (${human.toFixed(2)} − ${robot.toFixed(2)}) ÷ ${human.toFixed(2)} = {delta.toFixed(2)} ÷ {human.toFixed(2)} ={' '}
             {(delta / human).toFixed(4)}
           </p>
-          <p>
-            <span className="font-semibold text-ic-greenDeep">Inputs (base case):</span> ${human.toFixed(2)} per-order human courier
-            baseline (2024 avg) and ${robot.toFixed(2)} sidewalk-robot cost at scale - both from the pitch sensitivity table (
-            <code className="rounded bg-ic-cream2 px-1 font-mono text-[10px]">constants.ts</code>
-            ).
-          </p>
+          <div className="rounded-lg border border-ic-border bg-ic-cream2/70 p-2">
+            <div className="mb-1 text-[10px] font-bold uppercase tracking-wide text-ic-greenDeep">Robot cost stack (base $4.72)</div>
+            <div className="grid grid-cols-[1fr_auto] gap-x-2 gap-y-0.5 font-mono text-[10px] text-ic-greenDeep">
+              <span>Capex / depreciation</span><span>~$0.36</span>
+              <span>Charging</span><span>$0.60</span>
+              <span>Remote operations</span><span>$1.04</span>
+              <span>Maintenance</span><span>$0.75</span>
+              <span>Loading labor</span><span>$0.77</span>
+              <span>Buffer / dispatch / misc</span><span>~$1.20</span>
+              <span className="font-bold">Total</span><span className="font-bold">~$4.72</span>
+            </div>
+          </div>
           <p>
             Dollar savings: <strong className="text-ic-greenDeep">${delta.toFixed(2)}</strong> per order →{' '}
             <strong className="text-ic-greenDeep">{pctExact.toFixed(2)}%</strong> reduction; headline rounds to{' '}
@@ -439,11 +449,13 @@ function HeroStat({
   const sansClass = 'font-sans text-base font-bold leading-snug text-ic-orange md:text-lg'
   const captionFull = [caption, captionLine2].filter(Boolean).join(' ')
   const subFull = [sub, subLine2].filter(Boolean).join(' ')
+  const valueFull = `${prefix}${to.toFixed(decimals)}${twoLineSuffix ? ` ${twoLineSuffix.line1} ${twoLineSuffix.line2}` : suffix}`
+  const explanation = `${captionFull}: ${valueFull}. ${subFull}`
 
   return (
     <div className="flex min-w-0 flex-col" aria-label={`${captionFull}. ${subFull}. From ${from} to ${to}.`}>
       {twoLineSuffix ? (
-        <div className="flex flex-col items-start gap-0.5">
+        <div className="group relative flex flex-col items-start gap-0.5">
           <div className="flex items-baseline gap-x-0 text-xl font-extrabold leading-snug text-ic-orange md:text-2xl">
             <span className="font-mono tabular-nums leading-snug">
               {prefix}
@@ -452,14 +464,22 @@ function HeroStat({
             <span className={`${sansClass} pl-px`}>{twoLineSuffix.line1}</span>
           </div>
           <span className={`${sansClass} block`}>{twoLineSuffix.line2}</span>
+          <span className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-72 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+            {explanation}
+          </span>
         </div>
       ) : (
-        <div className="flex flex-wrap items-baseline gap-x-1 text-xl font-extrabold leading-snug text-ic-orange md:text-2xl">
-          <span className="font-mono tabular-nums leading-snug">
-            {prefix}
-            <Counter to={to} decimals={decimals} duration={1.6} />
+        <div className="group relative">
+          <div className="flex flex-wrap items-baseline gap-x-1 text-xl font-extrabold leading-snug text-ic-orange md:text-2xl">
+            <span className="font-mono tabular-nums leading-snug">
+              {prefix}
+              <Counter to={to} decimals={decimals} duration={1.6} />
+            </span>
+            {suffix ? <span className={`${sansClass}`}>{suffix}</span> : null}
+          </div>
+          <span className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-72 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+            {explanation}
           </span>
-          {suffix ? <span className={`${sansClass}`}>{suffix}</span> : null}
         </div>
       )}
       <div className="mt-2 text-[11px] font-bold uppercase tracking-wider text-ic-greenDeep">
@@ -488,6 +508,21 @@ function HeroStat({
 // 2. Urgency
 // ============================================================
 function Urgency() {
+  const urgencyBulletExplain: Record<string, string> = {
+    'Active in 7+ US markets (early 2026)': 'Amazon Prime Air had active commercial operations in at least 7 US markets by early 2026.',
+    'Targeting 500M drone deliveries/year by 2030': 'Stated long-term scale target from Amazon investor/public materials: 500 million annual drone deliveries by 2030.',
+    'MK30 drone: 5 lb max, 7.5-mile radius': 'Current-generation MK30 constraints used in this deck: payload up to 5 pounds and route radius around 7.5 miles.',
+    'Subsidizing at ~$63/delivery cost': 'Estimated early-stage per-delivery cost while Prime Air is still scaling and subsidizing operations.',
+    'Wing drones deployed in DFW metro': 'Walmart + Wing have active drone operations in the Dallas-Fort Worth metro area.',
+    'Serve Robotics partnership for sidewalk': 'Walmart has announced partnership paths that include sidewalk robotics capability.',
+    '4,700+ US stores as launch infrastructure': 'Walmart US physical footprint provides large launch density for last-mile rollouts.',
+    'Building hyper-local fulfillment moats': 'Dense local store coverage compounds delivery speed/availability advantages over time.',
+    '2,000+ robots deployed (Largest fleet)': 'Serve publicly reports 2,000+ robots deployed, one of the largest active sidewalk fleets.',
+    '3,600+ restaurant locations signed': 'Signed merchant footprint indicates broad route and order-surface coverage.',
+    'Gen-3 robots at 1/3 cost of Gen-2': 'Reported hardware unit-economics improvement: Gen-3 cost is roughly one-third of Gen-2.',
+    'Multi-year DoorDash partnership': 'DoorDash and Serve partnership duration supports sustained deployment and iteration.',
+  }
+
   return (
     <section id="urgency" className="section-alt">
       <div className="section-shell">
@@ -507,7 +542,15 @@ function Urgency() {
                 </div>
                 <ul className="mt-3 space-y-2 text-sm leading-relaxed text-ic-textMute">
                   {c.bullets.map((b) => (
-                    <li key={b} className="flex gap-2"><span className="text-ic-greenDeep">✓</span><span>{b}</span></li>
+                    <li key={b} className="group relative flex gap-2">
+                      <span className="text-ic-greenDeep">✓</span>
+                      <span className="underline decoration-dotted decoration-ic-orange/60 underline-offset-2">{b}</span>
+                      {urgencyBulletExplain[b] ? (
+                        <span className="pointer-events-none invisible absolute left-6 top-full z-20 mt-1 w-80 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
+                          {urgencyBulletExplain[b]}
+                        </span>
+                      ) : null}
+                    </li>
                   ))}
                 </ul>
               </Card>
@@ -575,6 +618,52 @@ function Opportunity() {
 // 4. Strategy - Connected Stack flywheel + alternatives + phase table
 // ============================================================
 function Strategy() {
+  const strategyValue = (value: string, explanation: string, widthClass = 'w-72') => (
+    <span className="group relative inline-flex">
+      <span className="underline decoration-dotted decoration-ic-orange/70 underline-offset-2">{value}</span>
+      <span className={`pointer-events-none invisible absolute left-0 top-full z-20 mt-2 ${widthClass} rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100`}>
+        {explanation}
+      </span>
+    </span>
+  )
+
+  const phaseRows = [
+    { k: 'Commit', a: 'COMMIT', b: 'CONDITIONAL' },
+    {
+      k: 'Radius',
+      a: strategyValue('0.5 to 3 miles', 'Sidewalk robots are strongest in dense near-store routes, so Phase 1 is scoped to roughly 0.5-3 mile service radii.'),
+      b: strategyValue('1 to 7.5 miles', 'Drone routes can stretch longer than sidewalks in low-friction geographies, so Phase 2 assumes up to ~7.5 miles.'),
+    },
+    {
+      k: 'Payload',
+      a: strategyValue('50 pounds / 25 items', 'Sidewalk robots are modeled for standard grocery baskets, up to about 50 pounds or roughly 25 items.'),
+      b: strategyValue('5 pounds / 1 to 2 items', 'Drones are constrained to lightweight, urgent baskets: around 5 pounds, typically 1-2 small items.'),
+    },
+    {
+      k: 'Timeline',
+      a: strategyValue('Months 0 to 12', 'Phase 1 is the first 12-month execution window for proving repeatable unit economics and operations.'),
+      b: strategyValue('Month 12+ (gate)', 'Phase 2 is intentionally gated after Month 12, contingent on performance, safety, and regulatory readiness.'),
+    },
+    {
+      k: 'Regulation',
+      a: strategyValue('Texas Senate Bill 969', 'Phase 1 robot operations align to the cited Texas sidewalk delivery framework used in this pilot plan.'),
+      b: strategyValue('Federal Aviation Administration Part 135', 'Commercial drone scale-up is tied to Federal Aviation Administration certification and operational constraints under Part 135.'),
+    },
+  ] as const
+
+  const alternatives: Array<{ title: string; verdict: string; pros: string; cons: string; consExplanation?: string }> = [
+    { title: 'Pure Partnership', verdict: 'Starting point, not end state', pros: 'Low capex, fast to market', cons: 'Zero IP, dependency on unprofitable partner' },
+    {
+      title: 'Acquire a Robotics Co.',
+      verdict: 'Evaluate after pilot',
+      pros: 'Own the IP, vertical integration',
+      cons: '$100M+ acquisition, outside core competency',
+      consExplanation: 'Mature robotics acquisitions can require $100M+ upfront capital before proving fit with Instacart operating model.',
+    },
+    { title: 'White-Label for Retailers', verdict: 'Phase 3 future state', pros: 'Aligns with enterprise platform strategy', cons: 'Requires proven unit economics first' },
+    { title: 'Do Nothing', verdict: 'Starting point, not end state', pros: 'No capex risk', cons: 'Competitors build moats, cost stays linear' },
+  ]
+
   return (
     <section id="strategy" className="section-alt">
       <div className="section-shell">
@@ -603,13 +692,7 @@ function Strategy() {
                   </tr>
                 </thead>
                 <tbody className="text-sm text-ic-greenDeep">
-                  {[
-                    ['Commit', 'COMMIT', 'CONDITIONAL'],
-                    ['Radius', '0.5 to 3 miles', '1 to 7.5 miles'],
-                    ['Payload', '50 pounds / 25 items', '5 pounds / 1 to 2 items'],
-                    ['Timeline', 'Months 0 to 12', 'Month 12+ (gate)'],
-                    ['Regulation', 'Texas Senate Bill 969', 'Federal Aviation Administration Part 135'],
-                  ].map(([k, a, b], i) => (
+                  {phaseRows.map(({ k, a, b }, i) => (
                     <tr key={k} className={i % 2 === 0 ? 'bg-ic-cream2' : ''}>
                       <td className="py-1.5 pr-2 font-semibold">{k}</td>
                       <td className={`py-1.5 ${k === 'Commit' ? 'font-bold text-ic-orange' : ''}`}>{a}</td>
@@ -632,7 +715,13 @@ function Strategy() {
                 Phase 1
               </div>
               <p className="mt-2 text-sm leading-relaxed text-white/90">
-                Aggressive rollout of sidewalk robots to capture high-density suburban demand and 53 percent cost savings.
+                Aggressive rollout of sidewalk robots to capture high-density suburban demand and{' '}
+                {strategyValue(
+                  '53 percent cost savings',
+                  `Base-case unit economics: ($${HUMAN_COURIER_COST.toFixed(2)} - $${ROBOT_TARGET_COST.toFixed(2)}) / $${HUMAN_COURIER_COST.toFixed(2)} = 53 percent savings versus human courier delivery. ${ROBOT_472_BREAKDOWN_INLINE}`,
+                  'w-80',
+                )}
+                .
               </p>
             </div>
             <div>
@@ -660,16 +749,16 @@ function Strategy() {
         <div className="mt-10">
           <h3 className="text-xl font-extrabold text-ic-greenDeep">Why Connected Delivery beats four alternatives</h3>
           <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {[
-              { title: 'Pure Partnership', verdict: 'Starting point, not end state', pros: 'Low capex, fast to market', cons: 'Zero IP, dependency on unprofitable partner' },
-              { title: 'Acquire a Robotics Co.', verdict: 'Evaluate after pilot', pros: 'Own the IP, vertical integration', cons: '$100M+ acquisition, outside core competency' },
-              { title: 'White-Label for Retailers', verdict: 'Phase 3 future state', pros: 'Aligns with enterprise platform strategy', cons: 'Requires proven unit economics first' },
-              { title: 'Do Nothing', verdict: 'Starting point, not end state', pros: 'No capex risk', cons: 'Competitors build moats, cost stays linear' },
-            ].map((alt) => (
+            {alternatives.map((alt) => (
               <Card key={alt.title}>
                 <h4 className="text-sm font-extrabold text-ic-greenDeep">{alt.title}</h4>
                 <p className="mt-2 text-xs text-ic-greenDeep">✓ {alt.pros}</p>
-                <p className="mt-1 text-xs text-red-700">✗ {alt.cons}</p>
+                <p className="mt-1 text-xs text-red-700">
+                  ✗{' '}
+                  {alt.consExplanation
+                    ? strategyValue(alt.cons, alt.consExplanation, 'w-80')
+                    : alt.cons}
+                </p>
                 <div className="mt-3 inline-flex rounded bg-ic-cream2 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-ic-greenDeep">
                   {alt.verdict}
                 </div>
@@ -742,6 +831,15 @@ function ConnectedStack() {
 // 5. Users - four-sided
 // ============================================================
 function UsersFourSided() {
+  const usersValue = (value: string, explanation: string, widthClass = 'w-72') => (
+    <span className="group relative inline-flex align-baseline">
+      <span className="underline decoration-dotted decoration-ic-orange/70 underline-offset-2">{value}</span>
+      <span className={`pointer-events-none invisible absolute left-0 top-full z-20 mt-2 ${widthClass} rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100`}>
+        {explanation}
+      </span>
+    </span>
+  )
+
   return (
     <section id="users" className="section-shell">
       <SectionHeader
@@ -752,55 +850,93 @@ function UsersFourSided() {
 
       <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <UserHeader icon={<Users className="h-5 w-5" />} title="Customer" count={`${(INSTACART_MAU / 1e6).toFixed(1)} million Monthly Active Users`} />
+          <UserHeader
+            icon={<Users className="h-5 w-5" />}
+            title="Customer"
+            count={
+              <>
+                {usersValue(`${(INSTACART_MAU / 1e6).toFixed(1)} million`, `Current modeled Instacart user base in this deck is ${(INSTACART_MAU / 1e6).toFixed(1)} million monthly active users.`)} Monthly Active Users
+              </>
+            }
+          />
           <ul className="mt-3 space-y-2 text-sm text-ic-textMute">
-            <li>Lower fee · <strong>${CUSTOMER_ROBOT_FEE.toFixed(2)}</strong> robot versus $5.99 standard</li>
-            <li>Faster Estimated Time of Arrival · <strong>~{CUSTOMER_AVG_DELIVERY_MINUTES} minutes</strong> with real-time tracking</li>
-            <li>Saves <strong>${CUSTOMER_FEE_SAVINGS.toFixed(2)} per order</strong> · contactless unlock code</li>
+            <li>Lower fee · {usersValue(`$${CUSTOMER_ROBOT_FEE.toFixed(2)}`, `Robot-delivery fee assumption for customer checkout: $${CUSTOMER_ROBOT_FEE.toFixed(2)}.`)} robot versus {usersValue('$5.99', 'Baseline standard delivery fee reference used for customer comparison.')}</li>
+            <li>Faster Estimated Time of Arrival · {usersValue(`~${CUSTOMER_AVG_DELIVERY_MINUTES} minutes`, `Estimated average robot delivery time in the model is about ${CUSTOMER_AVG_DELIVERY_MINUTES} minutes with live tracking.`)} with real-time tracking</li>
+            <li>Saves {usersValue(`$${CUSTOMER_FEE_SAVINGS.toFixed(2)} per order`, `Per-order customer savings formula: $5.99 standard fee - $${CUSTOMER_ROBOT_FEE.toFixed(2)} robot fee = $${CUSTOMER_FEE_SAVINGS.toFixed(2)}.`)} · contactless unlock code</li>
           </ul>
         </Card>
 
         <Card>
-          <UserHeader icon={<Zap className="h-5 w-5" />} title="Shopper" count={`~${SHOPPER_ACTIVE_COUNT.toLocaleString()} active`} />
+          <UserHeader
+            icon={<Zap className="h-5 w-5" />}
+            title="Shopper"
+            count={usersValue(`~${SHOPPER_ACTIVE_COUNT.toLocaleString()} active`, `Approximate active shopper population used in this model: ~${SHOPPER_ACTIVE_COUNT.toLocaleString()}.`)}
+          />
           <ul className="mt-3 space-y-2 text-sm text-ic-textMute">
-            <li>Earnings-neutral · <strong>${SHOPPER_ROBOT_PREMIUM} robot premium plus ${SHOPPER_ACCURACY_BONUS} accuracy bonus</strong></li>
+            <li>Earnings-neutral · {usersValue(`$${SHOPPER_ROBOT_PREMIUM} robot premium plus $${SHOPPER_ACCURACY_BONUS} accuracy bonus`, `Shopper incentive package in pilot: $${SHOPPER_ROBOT_PREMIUM} robot premium + $${SHOPPER_ACCURACY_BONUS} accuracy bonus per eligible order.`)}</li>
             <li>Skip delivery traffic · focus on high-value picking</li>
-            <li>Net-new small-basket volume <strong>($10 to $30 orders)</strong></li>
+            <li>Net-new small-basket volume {usersValue('($10 to $30 orders)', 'Target incremental basket band for convenience/forgotten-item demand: roughly $10-$30 orders.')}</li>
           </ul>
         </Card>
 
         <Card emphasize className="md:col-span-2 lg:col-span-2">
-          <UserHeader icon={<Store className="h-5 w-5" />} title="Retailer · Spine of strategy" count={`${RETAILER_PARTNERS.toLocaleString()}+ partners · ${RETAILER_STORE_COUNT.toLocaleString()}+ stores`} highlight />
+          <UserHeader
+            icon={<Store className="h-5 w-5" />}
+            title="Retailer · Spine of strategy"
+            count={
+              <>
+                {usersValue(`${RETAILER_PARTNERS.toLocaleString()}+`, `Current retailer partner count in scope for this strategy: ${RETAILER_PARTNERS.toLocaleString()}+.`)} partners ·{' '}
+                {usersValue(`${RETAILER_STORE_COUNT.toLocaleString()}+`, `Current store footprint in scope for rollout modeling: ${RETAILER_STORE_COUNT.toLocaleString()}+ stores.`)} stores
+              </>
+            }
+            highlight
+          />
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl bg-ic-greenSoft p-3">
               <div className="text-[10px] font-bold uppercase tracking-wider text-ic-greenDeep">Margin relief</div>
-              <div className="mt-1 font-mono text-2xl font-extrabold text-ic-greenDeep">${RETAILER_SAVINGS_PER_ORDER.toFixed(2)}</div>
+              <RetailerMetricValue
+                value={`$${RETAILER_SAVINGS_PER_ORDER.toFixed(2)}`}
+                explanation={`Formula: human courier ($${HUMAN_COURIER_COST.toFixed(2)}) - robot target ($${ROBOT_TARGET_COST.toFixed(2)}) = $${RETAILER_SAVINGS_PER_ORDER.toFixed(2)} saved per robot order. ${ROBOT_472_BREAKDOWN_INLINE}`}
+              />
               <div className="text-[10px] text-ic-textMute">cost saved per robot order</div>
             </div>
             <div className="rounded-xl bg-ic-orangeSoft p-3">
               <div className="text-[10px] font-bold uppercase tracking-wider text-ic-greenDeep">Branded doorstep</div>
-              <div className="mt-1 font-mono text-2xl font-extrabold text-ic-greenDeep">~50 square feet</div>
+              <RetailerMetricValue
+                value="~50 square feet"
+                explanation="Pilot bay assumption: approximately 50 square feet of store-perimeter footprint for docking, charging, and associate handoff."
+              />
               <div className="text-[10px] text-ic-textMute">store-perimeter footprint</div>
             </div>
             <div className="rounded-xl bg-ic-cream2 p-3">
               <div className="text-[10px] font-bold uppercase tracking-wider text-ic-greenDeep">Storefront continuity</div>
-              <div className="mt-1 font-mono text-2xl font-extrabold text-ic-greenDeep">30 percent+</div>
+              <RetailerMetricValue
+                value={`${fmtPct(RETAILER_DEFAULTS.retailerAdSharePct, 0)}+`}
+                explanation={`Retailer ad-share baseline is ${fmtPct(RETAILER_DEFAULTS.retailerAdSharePct, 0)} of Path-Based Dynamic Ads route revenue, with upside through design-partner negotiation.`}
+              />
               <div className="text-[10px] text-ic-textMute">Path-Based Dynamic Ads share to retailer</div>
             </div>
             <div className="rounded-xl bg-white p-3 ring-1 ring-ic-border">
               <div className="text-[10px] font-bold uppercase tracking-wider text-ic-greenDeep">Caper Cart → Robot continuity</div>
-              <div className="mt-1 font-mono text-2xl font-extrabold text-ic-greenDeep">42 percent</div>
+              <RetailerMetricValue
+                value={`${fmtPct(RETAILER_CAPER_CONTINUITY_RATE, 0)}`}
+                explanation={`Baseline continuity assumption in the model: ${fmtPct(RETAILER_CAPER_CONTINUITY_RATE, 0)} of robot deliveries come from carts that started in Caper Cart flows.`}
+              />
               <div className="text-[10px] text-ic-textMute">of orders flow Caper Cart → robot</div>
             </div>
           </div>
         </Card>
 
         <Card>
-          <UserHeader icon={<Megaphone className="h-5 w-5" />} title="Advertiser / Consumer Packaged Goods Brand" count={`${ADVERTISER_BRAND_COUNT.toLocaleString()}+ brands`} />
+          <UserHeader
+            icon={<Megaphone className="h-5 w-5" />}
+            title="Advertiser / Consumer Packaged Goods Brand"
+            count={usersValue(`${ADVERTISER_BRAND_COUNT.toLocaleString()}+ brands`, `Active advertiser/consumer packaged goods brand base used in this deck: ${ADVERTISER_BRAND_COUNT.toLocaleString()}+ brands.`)}
+          />
           <ul className="mt-3 space-y-2 text-sm text-ic-textMute">
-            <li>New path inventory · <strong>${PBDA_REVENUE_PER_DELIVERY_TARGET.toFixed(2)} per delivery</strong> target by month 9</li>
-            <li>Closed-loop Return on Ad Spend · <strong>${INSTACART_GROCERY_ROAS}</strong> beats Amazon's ${(INSTACART_GROCERY_ROAS - 0.33).toFixed(2)}</li>
-            <li>{(AD_GROSS_MARGIN * 100).toFixed(0)} percent gross margin on ad revenue</li>
+            <li>New path inventory · {usersValue(`$${PBDA_REVENUE_PER_DELIVERY_TARGET.toFixed(2)} per delivery`, `Path-Based Dynamic Ads target by month 9: $${PBDA_REVENUE_PER_DELIVERY_TARGET.toFixed(2)} ad revenue per robot delivery.`)} target by month 9</li>
+            <li>Closed-loop Return on Ad Spend · {usersValue(`$${INSTACART_GROCERY_ROAS}`, `Instacart grocery Return on Ad Spend benchmark shown here is ${INSTACART_GROCERY_ROAS}x.`)} beats Amazon's {usersValue(`${(INSTACART_GROCERY_ROAS - 0.33).toFixed(2)}`, 'Comparison benchmark for Amazon in this narrative is 0.33 lower than Instacart grocery Return on Ad Spend.')}</li>
+            <li>{usersValue(`${(AD_GROSS_MARGIN * 100).toFixed(0)} percent`, `Modeled ad gross margin rate is ${(AD_GROSS_MARGIN * 100).toFixed(0)} percent on route-media revenue.`)} gross margin on ad revenue</li>
           </ul>
         </Card>
       </div>
@@ -808,7 +944,7 @@ function UsersFourSided() {
   )
 }
 
-function UserHeader({ icon, title, count, highlight }: { icon: React.ReactNode; title: string; count: string; highlight?: boolean }) {
+function UserHeader({ icon, title, count, highlight }: { icon: React.ReactNode; title: string; count: React.ReactNode; highlight?: boolean }) {
   return (
     <div className="flex items-center gap-3">
       <div className={`grid h-10 w-10 place-items-center rounded-xl ${highlight ? 'bg-ic-orange text-white' : 'bg-ic-greenSoft text-ic-greenDeep'}`}>{icon}</div>
@@ -820,10 +956,36 @@ function UserHeader({ icon, title, count, highlight }: { icon: React.ReactNode; 
   )
 }
 
+function RetailerMetricValue({ value, explanation }: { value: string; explanation: string }) {
+  return (
+    <span className="group relative mt-1 inline-flex">
+      <button
+        type="button"
+        className="font-mono text-2xl font-extrabold text-ic-greenDeep underline decoration-dotted decoration-ic-orange/70 underline-offset-4"
+        aria-label={`Explain ${value}`}
+      >
+        {value}
+      </button>
+      <span className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-72 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+        {explanation}
+      </span>
+    </span>
+  )
+}
+
 // ============================================================
 // 6. Retailer Storefront Deep Dive - the centerpiece
 // ============================================================
 function RetailerDeepDive() {
+  const retailerValue = (value: string, explanation: string, widthClass = 'w-80') => (
+    <span className="group relative inline-flex align-baseline">
+      <span className="underline decoration-dotted decoration-ic-orange/70 underline-offset-2">{value}</span>
+      <span className={`pointer-events-none invisible absolute left-0 top-full z-20 mt-2 ${widthClass} rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100`}>
+        {explanation}
+      </span>
+    </span>
+  )
+
   return (
     <section id="retailer" className="section-alt">
       <div className="section-shell">
@@ -863,16 +1025,20 @@ function RetailerDeepDive() {
                     pain: 'Linear delivery cost compresses margin',
                     change: `$${RETAILER_SAVINGS_PER_ORDER.toFixed(2)} per order saved versus human courier · scales with volume`,
                     impact: '~$14,700 per year (pilot baseline)',
+                    changeExplanation: `Per-order savings formula: $${HUMAN_COURIER_COST.toFixed(2)} human courier - $${ROBOT_TARGET_COST.toFixed(2)} robot target = $${RETAILER_SAVINGS_PER_ORDER.toFixed(2)} saved. ${ROBOT_472_BREAKDOWN_INLINE}`,
+                    impactExplanation: 'Annualized pilot example value shown for one store at baseline volume and adoption assumptions.',
                   },
                   {
                     pain: 'No post-checkout differentiation surface',
                     change: "Path-Based Dynamic Ads · brand-and-retailer co-branded ads on robot screens (Kellogg's at HEB, Lay's at Kroger)",
                     impact: '~$4,100 per year ad-share',
+                    impactExplanation: 'Illustrative annual retailer ad-share at pilot baseline assumptions before broader rollout optimization.',
                   },
                   {
                     pain: 'Lost continuity between in-store and delivery',
                     change: 'Caper Cart shopper → robot delivery → re-order loop · 42 percent continuity rate',
                     impact: '+ Repeat-rate lift',
+                    changeExplanation: 'Continuity assumption is 42 percent of robot deliveries originating from Caper Cart-led in-store flows.',
                   },
                 ].map((row, i) => (
                   <div key={i} className="rounded-2xl border border-ic-border bg-white p-4 shadow-sm">
@@ -890,13 +1056,15 @@ function RetailerDeepDive() {
                         {/* TRANSFORMATION - orange arrow + bold green solution */}
                         <div className="flex items-start gap-2 border-t border-dashed border-ic-border pt-2">
                           <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-ic-orange" />
-                          <p className="text-sm font-semibold leading-snug text-ic-greenDeep">{row.change}</p>
+                          <p className="text-sm font-semibold leading-snug text-ic-greenDeep">
+                            {row.changeExplanation ? retailerValue(row.change, row.changeExplanation) : row.change}
+                          </p>
                         </div>
 
                         {/* IMPACT pill */}
                         <div className="inline-flex items-center gap-1.5 rounded-lg bg-ic-greenSoft px-3 py-1.5 text-sm font-bold text-ic-greenDeep">
                           <span className="text-ic-orange">$</span>
-                          {row.impact}
+                          {row.impactExplanation ? retailerValue(row.impact, row.impactExplanation) : row.impact}
                         </div>
                       </div>
                     </div>
@@ -925,7 +1093,15 @@ function RetailerDeepDive() {
         <div className="mt-10">
           <h3 className="text-2xl font-extrabold text-ic-greenDeep">6b · Retailer ROI calculator</h3>
           <p className="mt-1 max-w-3xl text-sm text-ic-textMute">
-            Defaults match the Dallas–Fort Worth pilot baseline (50 orders per day × 20 percent eligible × 15 percent opt-in × 30 percent ad-share). Drag any slider; the dashboard below updates live.
+            Defaults match the Dallas–Fort Worth pilot baseline (
+            {retailerValue('50 orders per day', 'Baseline modeled order volume per store per day for the initial Dallas-Fort Worth pilot cohorts.')}
+            {' × '}
+            {retailerValue('20 percent eligible', 'Share of orders assumed to be robot-eligible by geography, basket profile, and operating constraints.')}
+            {' × '}
+            {retailerValue('15 percent opt-in', 'Share of eligible orders assumed to opt into robot delivery at baseline messaging and pricing.')}
+            {' × '}
+            {retailerValue('30 percent ad-share', 'Retailer share of Path-Based Dynamic Ads revenue in initial design-partner economics.')}
+            ). Drag any slider; the dashboard below updates live.
           </p>
           <div className="mt-6">
             <RetailerROICalculator />
@@ -974,9 +1150,9 @@ function RetailerDeepDive() {
               <div className="rounded-2xl border-2 border-ic-orange bg-ic-orangeSoft p-5">
                 <div className="text-xs font-bold uppercase tracking-wider text-ic-orange">Design-partner clause</div>
                 <ul className="mt-2 space-y-1.5 text-sm text-ic-greenDeep">
-                  <li>· <strong>Shared economics</strong> - retailer keeps 30 percent or more of Path-Based Dynamic Ads revenue from their own routes</li>
+                  <li>· <strong>Shared economics</strong> - retailer keeps {retailerValue('30 percent or more', 'Starting design-partner floor for retailer share of route media revenue, with potential upside in negotiation.')} of Path-Based Dynamic Ads revenue from their own routes</li>
                   <li>· <strong>Co-developed user experience</strong> - retailer brand on robot, unlock screen, dashboard</li>
-                  <li>· <strong>Exclusivity window</strong> - first 12 months, no competing retailer onboarded in the same Designated Market Area</li>
+                  <li>· <strong>Exclusivity window</strong> - first {retailerValue('12 months', 'Initial exclusivity period in the same Designated Market Area to reward first design-partner adoption.','w-72')}, no competing retailer onboarded in the same Designated Market Area</li>
                   <li>· <strong>Joint quarterly review</strong> - operating model evolves on real numbers, not assumptions</li>
                 </ul>
               </div>
@@ -984,7 +1160,7 @@ function RetailerDeepDive() {
                 <div className="text-xs font-bold uppercase tracking-wider text-ic-greenDeep">Why this is hard to copy</div>
                 <ul className="mt-2 space-y-1.5 text-sm text-ic-textMute">
                   <li>· Caper Cart Computer-Vision stack (live in production) provides cargo verification that competitors cannot replicate</li>
-                  <li>· 100,000-store retailer relationship base - DoorDash and Amazon must build retailer trust we already have</li>
+                  <li>· {retailerValue('100,000-store', 'Instacart-scale retailer relationship footprint referenced as a distribution and trust advantage at launch.','w-72')} retailer relationship base - DoorDash and Amazon must build retailer trust we already have</li>
                   <li>· Path-Based Dynamic Ads economics fund the savings, breaking the linear-cost trap competitors are still subsidizing through</li>
                   <li>· Connected Stores → Robot data loop creates a compounding ad-targeting moat</li>
                 </ul>
@@ -1001,6 +1177,15 @@ function RetailerDeepDive() {
 // 7. Solutions
 // ============================================================
 function Solutions() {
+  const solveValue = (value: string, explanation: string, widthClass = 'w-80') => (
+    <span className="group relative inline-flex align-baseline">
+      <span className="underline decoration-dotted decoration-ic-orange/70 underline-offset-2">{value}</span>
+      <span className={`pointer-events-none invisible absolute left-0 top-full z-20 mt-2 ${widthClass} rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100`}>
+        {explanation}
+      </span>
+    </span>
+  )
+
   return (
     <section id="solutions" className="section-shell">
       <SectionHeader
@@ -1012,7 +1197,15 @@ function Solutions() {
       <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <SolutionHead icon={<Truck className="h-5 w-5" />} id="Solution 1" title="Sidewalk Fleet" lever="Cost lever" />
-          <p className="mt-3 text-sm text-ic-textMute">Partner-fleet (Serve Robotics / Coco) plus Instacart dispatch and user-experience layer. Cuts $5.38 per order. Phase 1 commit.</p>
+          <p className="mt-3 text-sm text-ic-textMute">
+            Partner-fleet (Serve Robotics / Coco) plus Instacart dispatch and user-experience layer. Cuts{' '}
+            {solveValue(
+              '$5.38 per order',
+              `Dollar savings in base case: $${HUMAN_COURIER_COST.toFixed(2)} human courier - $${ROBOT_TARGET_COST.toFixed(2)} robot target = $${(HUMAN_COURIER_COST - ROBOT_TARGET_COST).toFixed(2)} saved per order. ${ROBOT_472_BREAKDOWN_INLINE}`,
+              'w-[22rem]',
+            )}
+            . Phase 1 commit.
+          </p>
         </Card>
         <Card>
           <SolutionHead icon={<Cpu className="h-5 w-5" />} id="Solution 2" title="Caper Cart Computer-Vision Reuse" lever="Reliability lever" />
@@ -1020,11 +1213,21 @@ function Solutions() {
         </Card>
         <Card>
           <SolutionHead icon={<Store className="h-5 w-5" />} id="Solution 4" title="Retailer Bay + Dashboard" lever="Retailer lever" />
-          <p className="mt-3 text-sm text-ic-textMute">~50 square feet store-perimeter bay. Retailer panel: utilization, savings, Net Promoter Score, ad-share. Required before Solution 1 ships.</p>
+          <p className="mt-3 text-sm text-ic-textMute">
+            {solveValue('~50 square feet', 'Pilot bay assumption for docking/charging + associate handoff footprint per store.', 'w-72')}{' '}
+            store-perimeter bay. Retailer panel: utilization, savings, Net Promoter Score, ad-share. Required before Solution 1 ships.
+          </p>
         </Card>
         <Card>
           <SolutionHead icon={<Zap className="h-5 w-5" />} id="Solution 5" title="Shopper Premium" lever="Shopper lever" />
-          <p className="mt-3 text-sm text-ic-textMute">${SHOPPER_ROBOT_PREMIUM} loading premium plus ${SHOPPER_ACCURACY_BONUS} accuracy bonus. Keeps earnings neutral; redirects to high-value picking.</p>
+          <p className="mt-3 text-sm text-ic-textMute">
+            {solveValue(
+              `$${SHOPPER_ROBOT_PREMIUM} loading premium plus $${SHOPPER_ACCURACY_BONUS} accuracy bonus`,
+              `Shopper incentive package in pilot: $${SHOPPER_ROBOT_PREMIUM} robot-loading premium + $${SHOPPER_ACCURACY_BONUS} accuracy bonus per eligible order.`,
+              'w-[22rem]',
+            )}
+            . Keeps earnings neutral; redirects to high-value picking.
+          </p>
         </Card>
         <Card className="lg:col-span-2 bg-ic-greenSoft border-ic-greenDeep/40">
           <div className="flex items-start justify-between">
@@ -1037,16 +1240,41 @@ function Solutions() {
           <div className="mt-3 grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl bg-white p-3 ring-1 ring-ic-greenDeep/15">
               <div className="text-[10px] font-bold uppercase text-ic-greenDeep">Target by month 9</div>
-              <div className="font-mono text-2xl font-extrabold text-ic-orange">${PBDA_REVENUE_PER_DELIVERY_TARGET.toFixed(2)} per delivery</div>
+              <div className="font-mono text-2xl font-extrabold text-ic-orange">
+                {solveValue(
+                  `$${PBDA_REVENUE_PER_DELIVERY_TARGET.toFixed(2)} per delivery`,
+                  `Path-Based Dynamic Ads target by month 9: $${PBDA_REVENUE_PER_DELIVERY_TARGET.toFixed(2)} ad revenue per robot delivery route.`,
+                  'w-[22rem]',
+                )}
+              </div>
             </div>
             <div className="rounded-xl bg-white p-3 ring-1 ring-ic-greenDeep/15">
               <div className="text-[10px] font-bold uppercase text-ic-greenDeep">Effective cost per order</div>
-              <div className="font-mono text-2xl font-extrabold text-ic-orange">${SUCCESS_METRICS.costWithPbda.toFixed(2)}</div>
-              <div className="text-[10px] text-ic-textMute">$4.72 base − $1.50 ad funding</div>
+              <div className="font-mono text-2xl font-extrabold text-ic-orange">
+                {solveValue(
+                  `$${SUCCESS_METRICS.costWithPbda.toFixed(2)}`,
+                  `Effective cost after ad funding: $${SUCCESS_METRICS.costBase.toFixed(2)} base robot cost - $1.50 Path-Based Dynamic Ads per delivery = $${SUCCESS_METRICS.costWithPbda.toFixed(2)}.`,
+                  'w-[22rem]',
+                )}
+              </div>
+              <div className="text-[10px] text-ic-textMute">
+                {solveValue(
+                  '$4.72 base',
+                  ROBOT_472_BREAKDOWN_INLINE,
+                  'w-[26rem]',
+                )}{' '}
+                − {solveValue('$1.50 ad funding', 'Illustrative Path-Based Dynamic Ads funding per delivery at target maturity.', 'w-72')}
+              </div>
             </div>
             <div className="rounded-xl bg-white p-3 ring-1 ring-ic-greenDeep/15">
               <div className="text-[10px] font-bold uppercase text-ic-greenDeep">Ad gross margin</div>
-              <div className="font-mono text-2xl font-extrabold text-ic-orange">{(AD_GROSS_MARGIN * 100).toFixed(0)} percent</div>
+              <div className="font-mono text-2xl font-extrabold text-ic-orange">
+                {solveValue(
+                  `${(AD_GROSS_MARGIN * 100).toFixed(0)} percent`,
+                  `Modeled gross margin on ad revenue: ${(AD_GROSS_MARGIN * 100).toFixed(0)} percent.`,
+                  'w-72',
+                )}
+              </div>
               <div className="text-[10px] text-ic-textMute">Margin-accretive savings</div>
             </div>
           </div>
@@ -1299,7 +1527,7 @@ function Priority() {
         <SectionHeader
           eyebrow="07 · Prioritize"
           title="Why Solutions 2 and 4 Ship Before Solution 1, and Solution 3 Activates at Week 6"
-          sub="Reach × Impact × Confidence ÷ Effort sequencing - confidence and dependency drive the order. Caper Cart Computer-Vision reuse (Solution 2) has the highest confidence per engineer-month. Retailer instrumentation (Solution 4) gates onboarding. Sidewalk fleet (Solution 1) unlocks volume. Path-Based Dynamic Ads (Solution 3) only activate after route stability is proven."
+          sub="Reach × Impact × Confidence ÷ Effort sequencing - confidence and dependency drive the order. Caper Cart Computer-Vision reuse (Solution 2) has the highest confidence per engineer-month. Retailer instrumentation (Solution 4) gates onboarding. Sidewalk fleet (Solution 1) unlocks volume. Path-Based Dynamic Ads (Solution 3) only activate after route stability is proven. Week 6 is when Path-Based Dynamic Ads turn on."
         />
         <div className="mt-8">
           <GanttStrip />
@@ -1363,6 +1591,15 @@ function Stepper({ steps }: { steps: string[] }) {
 // 10. Metrics - ADCS-Net + success/guardrails + retailer panel
 // ============================================================
 function Metrics() {
+  const measureValue = (value: string, explanation: string, widthClass = 'w-80') => (
+    <span className="group relative inline-flex">
+      <span className="underline decoration-dotted decoration-ic-orange/70 underline-offset-4">{value}</span>
+      <span className={`pointer-events-none invisible absolute left-0 top-full z-20 mt-2 ${widthClass} rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100`}>
+        {explanation}
+      </span>
+    </span>
+  )
+
   return (
     <section id="metrics" className="section-alt">
       <div className="section-shell">
@@ -1385,17 +1622,35 @@ function Metrics() {
         <div className="mt-4 grid gap-4 md:grid-cols-3">
           <Card className="bg-ic-orangeSoft border-ic-orange/40">
             <div className="text-[10px] font-bold uppercase tracking-wider text-ic-orange">Guardrail</div>
-            <div className="mt-1 font-mono text-2xl font-extrabold text-ic-greenDeep">≥ 95 percent</div>
+            <div className="mt-1 font-mono text-2xl font-extrabold text-ic-greenDeep">
+              {measureValue(
+                '≥ 95 percent',
+                `Target delivery success rate is ≥ 95 percent. Pause threshold is below 90 percent.`,
+                'w-72',
+              )}
+            </div>
             <div className="text-xs text-ic-greenDeep">Delivery success rate · pause if below 90 percent</div>
           </Card>
           <Card className="bg-ic-orangeSoft border-ic-orange/40">
             <div className="text-[10px] font-bold uppercase tracking-wider text-ic-orange">Guardrail</div>
-            <div className="mt-1 font-mono text-2xl font-extrabold text-ic-greenDeep">≤ 5 points</div>
+            <div className="mt-1 font-mono text-2xl font-extrabold text-ic-greenDeep">
+              {measureValue(
+                '≤ 5 points',
+                'Target is ≤ 5 Net Promoter Score points gap between robot and human deliveries. Pause threshold is above 10.',
+                'w-80',
+              )}
+            </div>
             <div className="text-xs text-ic-greenDeep">Net Promoter Score gap (robot versus human) · pause if above 10</div>
           </Card>
           <Card className="bg-ic-orangeSoft border-ic-orange/40">
             <div className="text-[10px] font-bold uppercase tracking-wider text-ic-orange">Guardrail</div>
-            <div className="mt-1 font-mono text-2xl font-extrabold text-ic-greenDeep">±2 percent</div>
+            <div className="mt-1 font-mono text-2xl font-extrabold text-ic-greenDeep">
+              {measureValue(
+                '±2 percent',
+                'Target is shopper earnings parity within ±2 percent versus baseline. Pause threshold is above ±5 percent.',
+                'w-80',
+              )}
+            </div>
             <div className="text-xs text-ic-greenDeep">Shopper earnings parity · pause if above ±5 percent</div>
           </Card>
         </div>
@@ -1474,23 +1729,35 @@ function Metrics() {
 }
 
 function RetailerMetric({ label, value, sub }: { label: string; value: string; sub: string }) {
+  const explanation = `${label}: ${value}. ${sub}`
   return (
     <div className="rounded-2xl border border-ic-greenDeep/20 bg-white p-4">
       <div className="text-[10px] font-bold uppercase tracking-wider text-ic-textMute">{label}</div>
-      <div className="mt-1 font-mono text-2xl font-extrabold text-ic-greenDeep">{value}</div>
+      <div className="group relative mt-1 inline-block">
+        <div className="font-mono text-2xl font-extrabold text-ic-greenDeep">{value}</div>
+        <span className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-72 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
+          {explanation}
+        </span>
+      </div>
       <div className="text-[10px] text-ic-textMute">{sub}</div>
     </div>
   )
 }
 
 function HealthMetric({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string; sub: string }) {
+  const explanation = `${label}: ${value}. ${sub}`
   return (
     <div className="rounded-2xl border border-ic-greenDeep/20 bg-ic-cream2 p-4">
       <div className="flex items-center gap-2">
         <span className="grid h-7 w-7 place-items-center rounded-lg bg-ic-greenDeep text-white">{icon}</span>
         <div className="text-[10px] font-bold uppercase tracking-wider text-ic-greenDeep">{label}</div>
       </div>
-      <div className="mt-2 font-mono text-2xl font-extrabold text-ic-greenDeep">{value}</div>
+      <div className="group relative mt-2 inline-block">
+        <div className="font-mono text-2xl font-extrabold text-ic-greenDeep">{value}</div>
+        <span className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-72 rounded-xl border border-ic-border bg-white p-2 text-left text-[11px] font-normal leading-snug text-ic-greenDeep opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
+          {explanation}
+        </span>
+      </div>
       <div className="mt-1 text-[11px] leading-snug text-ic-textMute">{sub}</div>
     </div>
   )

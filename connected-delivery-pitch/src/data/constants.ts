@@ -194,6 +194,12 @@ export const RICE_SEQUENCE = [
     weeks: [0, 4],
     why: 'High confidence, highest leverage per engineer-month - reuses live intellectual property.',
     rice: 'Reach 4.5 · Impact 2 · Confidence 0.95 · Effort 1.5 → score 5.7',
+    riceExplain: {
+      reach: 'Applies across the platform: every robot delivery depends on cargo verification and checkout trust loops.',
+      impact: 'Reliability lever: reduces mis-packs, failed handoffs, and brand-risk incidents rather than directly cutting unit cost.',
+      confidence: 'High: reuses Caper Cart production Computer-Vision stack and known data pipelines.',
+      effort: 'Small: mostly integration and model reuse (no net-new hardware fleet work).',
+    },
   },
   {
     id: 'Solution 4',
@@ -201,6 +207,12 @@ export const RICE_SEQUENCE = [
     weeks: [2, 8],
     why: 'Required retailer instrumentation layer; gates onboarding.',
     rice: 'Reach 5 · Impact 3 · Confidence 0.85 · Effort 2 → score 6.4',
+    riceExplain: {
+      reach: 'Every pilot store needs a bay + dashboard to operate and measure economics; without it, rollout cannot scale.',
+      impact: 'High: unlocks onboarding, utilization, and recurring profit-and-loss reviews - the retailer adoption spine.',
+      confidence: 'Medium-high: mostly product + ops + instrumentation work with clear acceptance gates.',
+      effort: 'Moderate: multi-surface build (bay SOPs + dashboard + data plumbing).',
+    },
   },
   {
     id: 'Solution 1',
@@ -208,6 +220,12 @@ export const RICE_SEQUENCE = [
     weeks: [4, 10],
     why: 'Core volume and cost unlock; cannot test the North Star without it.',
     rice: 'Reach 5 · Impact 3 · Confidence 0.7 · Effort 4 → score 2.6',
+    riceExplain: {
+      reach: 'Directly touches every eligible order in pilot; it is the throughput engine for the North Star.',
+      impact: 'High: drives the $10.10 → $4.72 unit-economics step-change and delivery throughput.',
+      confidence: 'Medium: execution depends on partner fleet performance and real-world operational edge cases.',
+      effort: 'High: dispatch integration, incident tooling, operator workflow, and field ops coordination.',
+    },
   },
   {
     id: 'Solution 3',
@@ -215,6 +233,12 @@ export const RICE_SEQUENCE = [
     weeks: [6, 12],
     why: 'Funding mechanism; activates only after route stability proven.',
     rice: 'Reach 4 · Impact 3 · Confidence 0.6 · Effort 3 → score 2.4',
+    riceExplain: {
+      reach: 'Only applies to stable robot routes with predictable paths and inventory/context signals.',
+      impact: 'High: funds cost down (4.72 → 3.22) and creates a differentiated ad-supported moat.',
+      confidence: 'Medium-low: new IP + measurement loops + brand-safety constraints; depends on route stability.',
+      effort: 'High: targeting, auction/serving, creative pipeline, and closed-loop measurement MVP.',
+    },
   },
 ] as const
 
