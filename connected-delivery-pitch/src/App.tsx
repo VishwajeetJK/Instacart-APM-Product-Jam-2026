@@ -91,6 +91,7 @@ const links = [
   ['#pilot', 'Pilot'],
   ['#wireframes', 'UI'],
 ] as const
+const ASSET_BASE = import.meta.env.BASE_URL
 
 // ============================================================
 // App
@@ -132,7 +133,7 @@ function Nav({ open, setOpen }: { open: boolean; setOpen: (b: boolean) => void }
         <div className="flex min-w-0 items-center gap-3">
           <a href="#home" aria-label="Go to home section">
             <img
-              src="/connected-delivery-pitch/instacart-logo.png"
+              src={`${ASSET_BASE}instacart-logo.png`}
               alt="Instacart logo"
               className="h-[56px] w-auto shrink-0"
             />
@@ -143,7 +144,7 @@ function Nav({ open, setOpen }: { open: boolean; setOpen: (b: boolean) => void }
         </div>
         <div className="flex items-center gap-2 md:gap-3">
           <a
-            href="/connected-delivery-pitch/instacart-apm-pitch-deck.pdf"
+            href={`${ASSET_BASE}instacart-apm-pitch-deck.pdf`}
             target="_blank"
             rel="noreferrer"
             className="rounded-full bg-ic-greenDeep px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
@@ -284,7 +285,7 @@ function Hero() {
         </div>
         <div className="flex flex-col items-center lg:col-span-2">
           <img
-            src="/connected-delivery-pitch/instacart-robot-drone.png"
+            src={`${ASSET_BASE}instacart-robot-drone.png`}
             alt="Instacart robot and drone fleet concept"
             className="w-full rounded-3xl border border-ic-border bg-white p-2 shadow-sm"
           />
@@ -799,7 +800,7 @@ function RetailerDeepDive() {
             <div className="lg:sticky lg:top-24">
               <div className="overflow-hidden rounded-3xl border-2 border-ic-greenDeep/15 bg-white shadow-md">
                 <img
-                  src="/connected-delivery-pitch/dfw-pbda-billboard.png"
+                  src={`${ASSET_BASE}dfw-pbda-billboard.png`}
                   alt="Path-Based Dynamic Ads - Kellogg's at HEB and Lay's at Kroger on robot delivery storefronts across the Dallas–Fort Worth metro area"
                   className="w-full"
                 />
