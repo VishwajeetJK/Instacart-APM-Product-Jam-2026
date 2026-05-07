@@ -10,6 +10,8 @@ import {
   Map as MapIcon,
   Megaphone,
   Menu,
+  Pause,
+  Play,
   ShieldCheck,
   ShoppingBag,
   Store,
@@ -20,7 +22,7 @@ import {
   X,
   Zap,
 } from 'lucide-react'
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 
 import {
@@ -139,10 +141,11 @@ function Nav({ open, setOpen }: { open: boolean; setOpen: (b: boolean) => void }
             />
           </a>
           <span className="hidden truncate text-xs text-ic-textMute md:inline">
-            | APM Interview · Product Team Jam · Vishwajeet Jayanthi Karthikeyan
+            | APM Interview · Vishwajeet Jayanthi Karthikeyan
           </span>
         </div>
         <div className="flex items-center gap-2 md:gap-3">
+          <NavAudioPlayer />
           <a
             href={`${ASSET_BASE}instacart-apm-pitch-deck.pdf`}
             target="_blank"
@@ -175,6 +178,112 @@ function Nav({ open, setOpen }: { open: boolean; setOpen: (b: boolean) => void }
         </div>
       )}
     </nav>
+  )
+}
+
+function fmtClock(sec: number) {
+  const s = Math.max(0, Math.floor(sec))
+  const m = Math.floor(s / 60)
+  const r = s % 60
+  return `${m}:${r.toString().padStart(2, '0')}`
+}
+
+function NavAudioPlayer() {
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [duration, setDuration] = useState(0)
+  const [current, setCurrent] = useState(0)
+  const [speed, setSpeed] = useState(1)
+
+  useEffect(() => {
+    const a = audioRef.current
+    if (!a) return
+
+    const onLoaded = () => setDuration(Number.isFinite(a.duration) ? a.duration : 0)
+    const onTime = () => setCurrent(a.currentTime)
+    const onPlay = () => setIsPlaying(true)
+    const onPause = () => setIsPlaying(false)
+    const onEnded = () => setIsPlaying(false)
+
+    a.addEventListener('loadedmetadata', onLoaded)
+    a.addEventListener('timeupdate', onTime)
+    a.addEventListener('play', onPlay)
+    a.addEventListener('pause', onPause)
+    a.addEventListener('ended', onEnded)
+
+    return () => {
+      a.removeEventListener('loadedmetadata', onLoaded)
+      a.removeEventListener('timeupdate', onTime)
+      a.removeEventListener('play', onPlay)
+      a.removeEventListener('pause', onPause)
+      a.removeEventListener('ended', onEnded)
+    }
+  }, [])
+
+  const togglePlay = async () => {
+    const a = audioRef.current
+    if (!a) return
+    if (a.paused) await a.play()
+    else a.pause()
+  }
+
+  const setPlaybackSpeed = (next: number) => {
+    const a = audioRef.current
+    if (!a) return
+    a.playbackRate = next
+    setSpeed(next)
+  }
+
+  const seekTo = (next: number) => {
+    const a = audioRef.current
+    if (!a) return
+    a.currentTime = next
+    setCurrent(next)
+  }
+
+  return (
+    <div className="rounded-xl border border-ic-border bg-white p-1.5 lg:w-[430px] lg:px-2.5 lg:py-1.5">
+      <audio ref={audioRef} preload="metadata" src={`${ASSET_BASE}Ad-funded_robots_slash_Instacart_delivery_costs.m4a`} />
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={togglePlay}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-ic-greenDeep text-white transition hover:opacity-90"
+          aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+          title={isPlaying ? 'Pause' : 'Play'}
+        >
+          {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="ml-0.5 h-4 w-4" />}
+        </button>
+
+        <div className="hidden flex-1 items-center gap-2 lg:flex">
+          <span className="w-10 text-[10px] font-mono text-ic-textMute">{fmtClock(current)}</span>
+          <input
+            type="range"
+            min={0}
+            max={duration || 0}
+            step={0.1}
+            value={current}
+            onChange={(e) => seekTo(Number(e.target.value))}
+            className="h-1.5 flex-1 cursor-pointer accent-ic-orange"
+            aria-label="Audio progress"
+          />
+          <span className="w-10 text-right text-[10px] font-mono text-ic-textMute">{fmtClock(duration)}</span>
+
+          <div className="ml-1 inline-flex rounded-full border border-ic-border p-0.5">
+            {[1, 1.5, 2].map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setPlaybackSpeed(r)}
+                className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${speed === r ? 'bg-ic-orange text-white' : 'text-ic-greenDeep hover:bg-ic-cream2'}`}
+              >
+                {r}x
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -1387,8 +1496,34 @@ function HealthMetric({ icon, label, value, sub }: { icon: React.ReactNode; labe
   )
 }
 
+function PilotInvestmentCard() {
+  return (
+    <div className="rounded-3xl border-2 border-ic-greenDeep bg-ic-greenSoft p-6">
+      <div className="text-xs font-bold uppercase tracking-wider text-ic-orange">Pilot investment · bounded downside</div>
+      <div className="mt-3 space-y-2 text-sm">
+        {Object.values(PILOT_INVESTMENT).map((line) => (
+          <div key={line.label} className="flex items-baseline justify-between gap-4 border-b border-ic-greenDeep/15 pb-2">
+            <span className="text-ic-greenDeep">{line.label}</span>
+            <span className="font-mono font-bold text-ic-greenDeep">{fmtCompact(line.low)}–{fmtCompact(line.high)}</span>
+          </div>
+        ))}
+        <div className="flex items-baseline justify-between gap-4 pt-2">
+          <span className="text-base font-extrabold text-ic-greenDeep">Total pilot investment</span>
+          <span className="font-mono text-base font-extrabold text-ic-orange">{fmtCompact(PILOT_INVESTMENT_TOTAL.low)}–{fmtCompact(PILOT_INVESTMENT_TOTAL.high)}</span>
+        </div>
+      </div>
+      <div className="mt-4 rounded-xl bg-white p-3 text-xs text-ic-greenDeep ring-1 ring-ic-greenDeep/20">
+        <strong className="text-ic-orange">Autonomy supplements - never replaces - human courier capacity.</strong> 100% fallback at all times.
+      </div>
+      <p className="mt-3 text-[10px] italic text-ic-greenDeep/70">
+        Caveat: pilot investment excludes internal overhead for non-dedicated squads. Estimate held to direct, attributable spend.
+      </p>
+    </div>
+  )
+}
+
 // ============================================================
-// 11. Risk + Pilot Investment
+// 11. Risk
 // ============================================================
 function RiskAndPilot() {
   const risks: Array<[number, string, string, string, string]> = [
@@ -1410,9 +1545,9 @@ function RiskAndPilot() {
         sub={`We're spending less than $1.2 million to validate a $100-million-or-more annual savings opportunity. If the pilot fails, we've lost less than one quarter's spend on a mid-tier marketing campaign.`}
       />
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-3">
+      <div className="mt-8">
         {/* Risks table */}
-        <div className="lg:col-span-2 overflow-x-auto rounded-3xl border border-ic-border bg-white p-5 shadow-sm">
+        <div className="overflow-x-auto rounded-3xl border border-ic-border bg-white p-5 shadow-sm">
           <table className="w-full table-auto text-left text-sm">
             <thead className="text-ic-greenDeep">
               <tr className="border-b border-ic-border">
@@ -1435,29 +1570,6 @@ function RiskAndPilot() {
               ))}
             </tbody>
           </table>
-        </div>
-
-        {/* Pilot investment */}
-        <div className="rounded-3xl border-2 border-ic-greenDeep bg-ic-greenSoft p-6">
-          <div className="text-xs font-bold uppercase tracking-wider text-ic-orange">Pilot investment · bounded downside</div>
-          <div className="mt-3 space-y-2 text-sm">
-            {Object.values(PILOT_INVESTMENT).map((line) => (
-              <div key={line.label} className="flex items-baseline justify-between gap-4 border-b border-ic-greenDeep/15 pb-2">
-                <span className="text-ic-greenDeep">{line.label}</span>
-                <span className="font-mono font-bold text-ic-greenDeep">{fmtCompact(line.low)}–{fmtCompact(line.high)}</span>
-              </div>
-            ))}
-            <div className="flex items-baseline justify-between gap-4 pt-2">
-              <span className="text-base font-extrabold text-ic-greenDeep">Total pilot investment</span>
-              <span className="font-mono text-base font-extrabold text-ic-orange">{fmtCompact(PILOT_INVESTMENT_TOTAL.low)}–{fmtCompact(PILOT_INVESTMENT_TOTAL.high)}</span>
-            </div>
-          </div>
-          <div className="mt-4 rounded-xl bg-white p-3 text-xs text-ic-greenDeep ring-1 ring-ic-greenDeep/20">
-            <strong className="text-ic-orange">Autonomy supplements - never replaces - human courier capacity.</strong> 100% fallback at all times.
-          </div>
-          <p className="mt-3 text-[10px] italic text-ic-greenDeep/70">
-            Caveat: pilot investment excludes internal overhead for non-dedicated squads. Estimate held to direct, attributable spend.
-          </p>
         </div>
       </div>
     </section>
@@ -1567,6 +1679,10 @@ function PilotPlan() {
               </tbody>
             </table>
           </Card>
+        </div>
+
+        <div className="mx-auto mt-10 max-w-xl">
+          <PilotInvestmentCard />
         </div>
       </div>
     </section>
