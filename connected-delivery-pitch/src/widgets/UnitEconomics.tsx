@@ -9,6 +9,7 @@ import {
   OPERATOR_HOURS_PER_DAY,
   REMOTE_OPERATOR_WAGE_PER_HOUR,
   ROBOT_DEPRECIATION_YEARS,
+  ROBOT_TARGET_COST,
   fmtMoney,
   fmtPct,
 } from '../data/constants'
@@ -16,9 +17,19 @@ import { Slider, Preset, SoftSpring } from '../components/primitives'
 
 type Scenario = 'bear' | 'base' | 'bull' | 'custom'
 
+// Calibrate base-case operator coverage so default sliders reproduce $4.72 target.
+const BASE_DELIVERIES_PER_DAY = 5
+const BASE_CAPEX = 2000
+const baseOrdersPerYear = BASE_DELIVERIES_PER_DAY * 365
+const baseRobotCostPerOrder = BASE_CAPEX / ROBOT_DEPRECIATION_YEARS / baseOrdersPerYear + CHARGING_COST_PER_ORDER
+const baseMaintenancePerOrder = (BASE_CAPEX * MAINTENANCE_PCT_OF_CAPEX) / baseOrdersPerYear + MAINTENANCE_WEAR_PER_ORDER
+const baseFixedPerOrder = baseRobotCostPerOrder + baseMaintenancePerOrder + LOADING_COST_PER_ORDER
+const baseRemoteOpsTarget = ROBOT_TARGET_COST - baseFixedPerOrder
+const BASE_OP_RATIO = (REMOTE_OPERATOR_WAGE_PER_HOUR * OPERATOR_HOURS_PER_DAY) / (baseRemoteOpsTarget * BASE_DELIVERIES_PER_DAY)
+
 const PRESETS: Record<Exclude<Scenario, 'custom'>, { delPerDay: number; capex: number; opRatio: number }> = {
   bear: { delPerDay: 3, capex: 2200, opRatio: 8 },
-  base: { delPerDay: 5, capex: 2000, opRatio: 12 },
+  base: { delPerDay: BASE_DELIVERIES_PER_DAY, capex: BASE_CAPEX, opRatio: BASE_OP_RATIO },
   bull: { delPerDay: 8, capex: 1800, opRatio: 16 },
 }
 
@@ -47,9 +58,10 @@ export function UnitEconomics() {
   const bull = compute(PRESETS.bull.delPerDay, PRESETS.bull.capex, PRESETS.bull.opRatio)
 
   const activePreset: Scenario = useMemo(() => {
-    if (delPerDay === PRESETS.bear.delPerDay && capex === PRESETS.bear.capex && opRatio === PRESETS.bear.opRatio) return 'bear'
-    if (delPerDay === PRESETS.base.delPerDay && capex === PRESETS.base.capex && opRatio === PRESETS.base.opRatio) return 'base'
-    if (delPerDay === PRESETS.bull.delPerDay && capex === PRESETS.bull.capex && opRatio === PRESETS.bull.opRatio) return 'bull'
+    const eq = (a: number, b: number) => Math.abs(a - b) < 0.001
+    if (eq(delPerDay, PRESETS.bear.delPerDay) && eq(capex, PRESETS.bear.capex) && eq(opRatio, PRESETS.bear.opRatio)) return 'bear'
+    if (eq(delPerDay, PRESETS.base.delPerDay) && eq(capex, PRESETS.base.capex) && eq(opRatio, PRESETS.base.opRatio)) return 'base'
+    if (eq(delPerDay, PRESETS.bull.delPerDay) && eq(capex, PRESETS.bull.capex) && eq(opRatio, PRESETS.bull.opRatio)) return 'bull'
     return 'custom'
   }, [delPerDay, capex, opRatio])
 
@@ -112,9 +124,9 @@ export function UnitEconomics() {
           onChange={setOpRatio}
           min={6}
           max={18}
-          step={1}
-          format={(v) => `1 to ${v.toFixed(0)}`}
-          hint="Base case: 1 to 12. Improves as remote takeover events drop with maturity."
+          step={0.01}
+          format={(v) => `1 to ${v.toFixed(2)}`}
+          hint={`Base case tuned to 1 to ${PRESETS.base.opRatio.toFixed(2)} so default sliders match $${ROBOT_TARGET_COST.toFixed(2)}.`}
         />
 
         {/* Live numbers */}
