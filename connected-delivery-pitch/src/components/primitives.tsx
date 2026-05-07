@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 // ============================================================
-// Pill — small label badge
+// Pill - small label badge
 // ============================================================
 export function Pill({ children, variant = 'orange' }: { children: ReactNode; variant?: 'orange' | 'green' }) {
   const cls = variant === 'green' ? 'bg-ic-greenSoft' : 'bg-ic-orangeSoft'
@@ -15,7 +15,7 @@ export function Pill({ children, variant = 'orange' }: { children: ReactNode; va
 }
 
 // ============================================================
-// Section Header — eyebrow + title + sub
+// Section Header - eyebrow + title + sub
 // ============================================================
 export function SectionHeader({ eyebrow, title, sub }: { eyebrow: string; title: string; sub: string }) {
   return (
@@ -28,7 +28,7 @@ export function SectionHeader({ eyebrow, title, sub }: { eyebrow: string; title:
 }
 
 // ============================================================
-// KPI Tile — big number with label, optional sub
+// KPI Tile - big number with label, optional sub
 // ============================================================
 export function KPI({
   label,
@@ -60,7 +60,7 @@ export function KPI({
 }
 
 // ============================================================
-// Animated Counter — counts up on first view
+// Animated Counter - counts up on first view
 // ============================================================
 export function Counter({
   to,
@@ -102,7 +102,7 @@ export function Counter({
 }
 
 // ============================================================
-// Slider — labeled range input
+// Slider - labeled range input
 // ============================================================
 export function Slider({
   label,
@@ -165,7 +165,7 @@ export function Slider({
 }
 
 // ============================================================
-// PresetButton row — quick-set scenario buttons
+// PresetButton row - quick-set scenario buttons
 // ============================================================
 export function Preset({
   active,
@@ -195,7 +195,7 @@ export function Preset({
 }
 
 // ============================================================
-// Card — base panel
+// Card - base panel
 // ============================================================
 export function Card({
   children,
@@ -211,7 +211,7 @@ export function Card({
 }
 
 // ============================================================
-// SoftSpring number — for live KPI values that smoothly tween
+// SoftSpring number - for live KPI values that smoothly tween
 // ============================================================
 export function SoftSpring({ value, format }: { value: number; format: (v: number) => string }) {
   const spring = useSpring(value, { stiffness: 120, damping: 24 })
@@ -221,7 +221,7 @@ export function SoftSpring({ value, format }: { value: number; format: (v: numbe
 }
 
 // ============================================================
-// Reveal — fade + slide on scroll into view
+// Reveal - fade + slide on scroll into view
 // ============================================================
 export function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   return (

@@ -20,7 +20,7 @@ import {
   X,
   Zap,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { motion } from 'framer-motion'
 
 import {
@@ -76,7 +76,7 @@ import {
 } from './widgets/Wireframes'
 
 // ============================================================
-// Nav links — match the 14-section spine
+// Nav links - match the 14-section spine
 // ============================================================
 const links = [
   ['#urgency', 'Urgency'],
@@ -177,6 +177,58 @@ function Nav({ open, setOpen }: { open: boolean; setOpen: (b: boolean) => void }
   )
 }
 
+/** Hover / focus tooltip for headline “53%” - formula matches unit-economics base case in `constants.ts`. */
+function HeroSavingsTooltip() {
+  const tipId = useId()
+  const human = HUMAN_COURIER_COST
+  const robot = ROBOT_TARGET_COST
+  const delta = human - robot
+  const pctExact = (delta / human) * 100
+  const pctRounded = Math.round(pctExact)
+
+  return (
+    <span className="group relative inline-block align-baseline">
+      <button
+        type="button"
+        className="cursor-help border-0 bg-transparent p-0 font-bold text-ic-greenDeep underline decoration-dotted decoration-ic-orange/70 underline-offset-[3px] transition hover:text-ic-orange focus:outline-none focus-visible:ring-2 focus-visible:ring-ic-orange/40 focus-visible:ring-offset-2"
+        aria-describedby={tipId}
+      >
+        {pctRounded}%
+      </button>
+      <span
+        id={tipId}
+        role="tooltip"
+        className="pointer-events-none invisible absolute left-1/2 top-full z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 rounded-xl border-2 border-ic-greenDeep/15 bg-white px-3 py-2.5 text-left font-sans shadow-lg opacity-0 transition-opacity duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+      >
+        <div className="text-[10px] font-bold uppercase tracking-wide text-ic-orange">How we got {pctRounded}%</div>
+        <div className="mt-2 space-y-2 text-[11px] leading-snug text-ic-textMute">
+          <p>
+            <span className="font-semibold text-ic-greenDeep">Formula:</span>{' '}
+            <span className="font-mono text-ic-greenDeep">
+              (C<sub>human</sub> − C<sub>robot</sub>) ÷ C<sub>human</sub>
+            </span>
+          </p>
+          <p className="font-mono text-[11px] text-ic-greenDeep">
+            (${human.toFixed(2)} − ${robot.toFixed(2)}) ÷ ${human.toFixed(2)} = {delta.toFixed(2)} ÷ {human.toFixed(2)} ={' '}
+            {(delta / human).toFixed(4)}
+          </p>
+          <p>
+            <span className="font-semibold text-ic-greenDeep">Inputs (base case):</span> ${human.toFixed(2)} per-order human courier
+            baseline (2024 avg) and ${robot.toFixed(2)} sidewalk-robot cost at scale - both from the pitch sensitivity table (
+            <code className="rounded bg-ic-cream2 px-1 font-mono text-[10px]">constants.ts</code>
+            ).
+          </p>
+          <p>
+            Dollar savings: <strong className="text-ic-greenDeep">${delta.toFixed(2)}</strong> per order →{' '}
+            <strong className="text-ic-greenDeep">{pctExact.toFixed(2)}%</strong> reduction; headline rounds to{' '}
+            <strong className="text-ic-greenDeep">{pctRounded}%</strong>.
+          </p>
+        </div>
+      </span>
+    </span>
+  )
+}
+
 // ============================================================
 // 1. Hero
 // ============================================================
@@ -189,21 +241,23 @@ function Hero() {
           <Pill>Associate Product Manager Interview · Product Team Jam</Pill>
           <h1 className="text-5xl font-extrabold leading-[1.02] text-ic-greenDeep md:text-7xl">Connected Delivery</h1>
           <p className="text-2xl font-bold text-ic-orange">Path-Aware Autonomous Last-Mile, Funded by Ads</p>
-          <p className="max-w-3xl text-lg leading-relaxed text-ic-greenDeep/90">
-            Cut delivery cost by <strong>53%</strong>, turn every Connected Store into a doorstep ad surface, and protect Instacart's
-            storefronts moat against Amazon, Walmart, and DoorDash — with a phased commit (sidewalk robots now,
+          <p className="max-w-3xl text-[18px] leading-relaxed text-ic-greenDeep/90">
+            Cut delivery cost by <HeroSavingsTooltip />, turn every Connected Store into a doorstep ad surface, and protect Instacart's
+            storefronts moat against Amazon, Walmart, and DoorDash - with a phased commit (sidewalk robots now,
             aerial drones conditional).
           </p>
 
           {/* Hero metrics strip with animated counters */}
-          <div className="mt-6 grid grid-cols-3 gap-3 rounded-2xl border-2 border-ic-greenDeep/20 bg-white p-4">
+          <div className="mt-6 grid grid-cols-3 items-end gap-3 rounded-2xl border-2 border-ic-greenDeep/20 bg-white p-4 md:gap-4">
             <HeroStat
               prefix="$"
               from={HUMAN_COURIER_COST}
               to={ROBOT_TARGET_COST}
               decimals={2}
-              caption="Cost per order at scale"
-              sub={`versus $${HUMAN_COURIER_COST.toFixed(2)} human baseline`}
+              caption="Cost per order"
+              captionLine2="at scale"
+              sub={`versus $${HUMAN_COURIER_COST.toFixed(2)}`}
+              subLine2="human baseline"
             />
             <HeroStat
               from={0}
@@ -211,24 +265,30 @@ function Hero() {
               decimals={0}
               suffix=" per day"
               caption="Autonomous deliveries per Connected Store at month 24"
-              sub="Our North-Star metric — daily throughput per store"
+              sub="Our North-Star metric - daily throughput per store"
             />
             <HeroStat
               from={0}
               to={AD_REV_AS_PCT_OF_GTV_TARGET * 100}
               decimals={1}
-              suffix="% of Gross Transaction Value"
+              twoLineSuffix={{ line1: '% of Gross', line2: 'Transaction Value' }}
               caption="Ad revenue trajectory"
               sub={`Currently ${(AD_REV_AS_PCT_OF_GTV_CURRENT * 100).toFixed(1)} percent · target 4 to 5 percent`}
             />
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <span className="chip chip-green">Phase 1 (12 months) — Sidewalk Robots: Commit</span>
-            <span className="chip chip-peach">Phase 2 (12+ months) — Aerial Drones: Conditional</span>
+            <span className="chip chip-green">Phase 1 (12 months) - Sidewalk Robots: Commit</span>
+            <span className="chip chip-peach">Phase 2 (12+ months) - Aerial Drones: Conditional</span>
           </div>
-
-          <div className="mt-2 flex flex-wrap gap-2">
+        </div>
+        <div className="flex flex-col items-center lg:col-span-2">
+          <img
+            src="/connected-delivery-pitch/instacart-robot-drone.png"
+            alt="Instacart robot and drone fleet concept"
+            className="w-full rounded-3xl border border-ic-border bg-white p-2 shadow-sm"
+          />
+          <div className="mt-5 flex w-full max-w-md flex-wrap justify-center gap-2">
             <a href="#retailer" className="inline-flex items-center gap-2 rounded-full bg-ic-greenDeep px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:opacity-90">
               Jump to Retailer Storefront <ArrowRight className="h-4 w-4" />
             </a>
@@ -236,13 +296,6 @@ function Hero() {
               Open the Unit-Economics Calculator <ArrowRight className="h-4 w-4" />
             </a>
           </div>
-        </div>
-        <div className="lg:col-span-2">
-          <img
-            src="/connected-delivery-pitch/instacart-robot-drone.png"
-            alt="Instacart robot and drone fleet concept"
-            className="w-full rounded-3xl border border-ic-border bg-white p-2 shadow-sm"
-          />
         </div>
       </div>
     </section>
@@ -257,6 +310,9 @@ function HeroStat({
   decimals,
   caption,
   sub,
+  captionLine2,
+  subLine2,
+  twoLineSuffix,
 }: {
   prefix?: string
   suffix?: string
@@ -265,18 +321,55 @@ function HeroStat({
   decimals: number
   caption: string
   sub: string
+  captionLine2?: string
+  subLine2?: string
+  /** Second line after number (e.g. “% of Gross” / “Transaction Value”) - same scale as “60 per day”. */
+  twoLineSuffix?: { line1: string; line2: string }
 }) {
+  const sansClass = 'font-sans text-base font-bold leading-snug text-ic-orange md:text-lg'
+  const captionFull = [caption, captionLine2].filter(Boolean).join(' ')
+  const subFull = [sub, subLine2].filter(Boolean).join(' ')
+
   return (
-    <div aria-label={`${caption} from ${from} to ${to}`}>
-      <div className="text-2xl font-extrabold leading-tight text-ic-orange md:text-3xl">
-        <span className="font-mono">
-          {prefix}
-          <Counter to={to} decimals={decimals} duration={1.6} />
-        </span>
-        {suffix && <span className="ml-1 font-sans text-xl font-bold md:text-2xl">{suffix}</span>}
+    <div className="flex min-w-0 flex-col" aria-label={`${captionFull}. ${subFull}. From ${from} to ${to}.`}>
+      {twoLineSuffix ? (
+        <div className="flex flex-col items-start gap-0.5">
+          <div className="flex items-baseline gap-x-0 text-xl font-extrabold leading-snug text-ic-orange md:text-2xl">
+            <span className="font-mono tabular-nums leading-snug">
+              {prefix}
+              <Counter to={to} decimals={decimals} duration={1.6} />
+            </span>
+            <span className={`${sansClass} pl-px`}>{twoLineSuffix.line1}</span>
+          </div>
+          <span className={`${sansClass} block`}>{twoLineSuffix.line2}</span>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-baseline gap-x-1 text-xl font-extrabold leading-snug text-ic-orange md:text-2xl">
+          <span className="font-mono tabular-nums leading-snug">
+            {prefix}
+            <Counter to={to} decimals={decimals} duration={1.6} />
+          </span>
+          {suffix ? <span className={`${sansClass}`}>{suffix}</span> : null}
+        </div>
+      )}
+      <div className="mt-2 text-[11px] font-bold uppercase tracking-wider text-ic-greenDeep">
+        {caption}
+        {captionLine2 ? (
+          <>
+            <br />
+            {captionLine2}
+          </>
+        ) : null}
       </div>
-      <div className="mt-1 text-[11px] font-bold uppercase tracking-wider text-ic-greenDeep">{caption}</div>
-      <div className="text-[10px] leading-snug text-ic-textMute">{sub}</div>
+      <div className="mt-0.5 text-[10px] leading-snug text-ic-textMute">
+        {sub}
+        {subLine2 ? (
+          <>
+            <br />
+            {subLine2}
+          </>
+        ) : null}
+      </div>
     </div>
   )
 }
@@ -318,7 +411,7 @@ function Urgency() {
             EXPLORING · {RETAILER_STORE_COUNT.toLocaleString()}+ stores · {(INSTACART_MAU / 1e6).toFixed(1)} million Monthly Active Users · <span className="text-ic-orange">ZERO autonomous capability</span>
           </div>
           <p className="mx-auto mt-3 max-w-3xl text-sm text-ic-greenDeep/80 md:text-base">
-            "Every quarter we wait, competitors build operational moats. Our store density is necessary — but not sufficient. We must act now."
+            "Every quarter we wait, competitors build operational moats. Our store density is necessary - but not sufficient. We must act now."
           </p>
         </div>
 
@@ -331,7 +424,7 @@ function Urgency() {
 }
 
 // ============================================================
-// 3. Opportunity — Unit Economics
+// 3. Opportunity - Unit Economics
 // ============================================================
 function Opportunity() {
   return (
@@ -339,7 +432,7 @@ function Opportunity() {
       <SectionHeader
         eyebrow="02 · Opportunity"
         title="Last-Mile Cost Is Our Single Biggest Margin Lever"
-        sub={`Sidewalk robots at scale cut delivery cost from $${HUMAN_COURIER_COST.toFixed(2)} to $${ROBOT_TARGET_COST.toFixed(2)} per order — 53% savings. The interactive panel below stress-tests every assumption live.`}
+        sub={`Sidewalk robots at scale cut delivery cost from $${HUMAN_COURIER_COST.toFixed(2)} to $${ROBOT_TARGET_COST.toFixed(2)} per order - 53% savings. The interactive panel below stress-tests every assumption live.`}
       />
 
       <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -369,7 +462,7 @@ function Opportunity() {
 }
 
 // ============================================================
-// 4. Strategy — Connected Stack flywheel + alternatives + phase table
+// 4. Strategy - Connected Stack flywheel + alternatives + phase table
 // ============================================================
 function Strategy() {
   return (
@@ -378,7 +471,7 @@ function Strategy() {
         <SectionHeader
           eyebrow="03 · Strategy"
           title="Connected Delivery Is the Missing Tier of the Instacart Operating System"
-          sub="The Computer Vision that powers Caper Cart can verify robot cargo. The data from robot delivery feeds Connected Commerce. We're not building a delivery service — we're closing the platform loop."
+          sub="The Computer Vision that powers Caper Cart can verify robot cargo. The data from robot delivery feeds Connected Commerce. We're not building a delivery service - we're closing the platform loop."
         />
 
         <div className="mt-10 grid gap-8 lg:grid-cols-5">
@@ -529,14 +622,14 @@ function ConnectedStack() {
         </div>
       ))}
       <div className="mt-3 rounded-2xl border-2 border-dashed border-ic-greenDeep/30 bg-white p-4 text-sm text-ic-greenDeep">
-        <strong>The bridge:</strong> the same Computer Vision that powers Caper Cart item recognition can power robot cargo verification. We're not building a delivery service — we're <em>extending the platform</em>.
+        <strong>The bridge:</strong> the same Computer Vision that powers Caper Cart item recognition can power robot cargo verification. We're not building a delivery service - we're <em>extending the platform</em>.
       </div>
     </div>
   )
 }
 
 // ============================================================
-// 5. Users — four-sided
+// 5. Users - four-sided
 // ============================================================
 function UsersFourSided() {
   return (
@@ -544,7 +637,7 @@ function UsersFourSided() {
       <SectionHeader
         eyebrow="04 · Users"
         title="Four-Sided Ecosystem: Win Conditions, Quantified"
-        sub="Retailer is double-width and ringed orange — Storefronts is the spine of this strategy."
+        sub="Retailer is double-width and ringed orange - Storefronts is the spine of this strategy."
       />
 
       <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
@@ -618,7 +711,7 @@ function UserHeader({ icon, title, count, highlight }: { icon: React.ReactNode; 
 }
 
 // ============================================================
-// 6. Retailer Storefront Deep Dive — the centerpiece
+// 6. Retailer Storefront Deep Dive - the centerpiece
 // ============================================================
 function RetailerDeepDive() {
   return (
@@ -627,20 +720,20 @@ function RetailerDeepDive() {
         <SectionHeader
           eyebrow="05 · Retailer Storefronts (Deep Dive)"
           title="Every Robot Becomes a Branded, Data-Powered Storefront"
-          sub='"Turn every delivery into a moving, data-powered storefront — using Instacart’s first-party insights to target high-intent ads on robots that don’t just deliver groceries, but subsidize the cost of getting them there."'
+          sub='"Turn every delivery into a moving, data-powered storefront - using Instacart’s first-party insights to target high-intent ads on robots that don’t just deliver groceries, but subsidize the cost of getting them there."'
         />
 
-        {/* 6a · Why retailers win — paired side-by-side with the billboard image. Table left, image right. */}
+        {/* 6a · Why retailers win - paired side-by-side with the billboard image. Table left, image right. */}
         <Reveal>
           <div className="mt-10 grid items-start gap-8 lg:grid-cols-2">
-            {/* LEFT — 6a table */}
+            {/* LEFT - 6a table */}
             <div>
               <h3 className="text-2xl font-extrabold text-ic-greenDeep">6a · Why retailers win</h3>
               <p className="mt-1 text-sm text-ic-textMute">
                 Four discrete retailer pains, each transformed by Connected Delivery, each with a quantified profit-and-loss impact at the pilot baseline.
               </p>
 
-              {/* Single legend strip — replaces repeated per-card labels */}
+              {/* Single legend strip - replaces repeated per-card labels */}
               <div className="mt-4 grid grid-cols-[auto_1fr_auto_1fr_auto] items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-ic-textMute">
                 <span className="rounded-md bg-red-100 px-2 py-1 text-red-700">Today</span>
                 <span className="text-center text-ic-textMute">→</span>
@@ -652,7 +745,7 @@ function RetailerDeepDive() {
               <div className="mt-3 space-y-3">
                 {[
                   {
-                    pain: 'Black-box delivery — brand trust evaporates after checkout',
+                    pain: 'Black-box delivery - brand trust evaporates after checkout',
                     change: 'Retailer-branded robot · branded delivery confirmation · branded unlock screen',
                     impact: '+ Net Promoter Score uplift, surveyed',
                   },
@@ -678,13 +771,13 @@ function RetailerDeepDive() {
                         {i + 1}
                       </span>
                       <div className="flex-1 space-y-2.5">
-                        {/* PAIN — muted, with red dot prefix */}
+                        {/* PAIN - muted, with red dot prefix */}
                         <div className="flex items-start gap-2">
                           <span className="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full bg-red-400" />
                           <p className="text-sm leading-snug text-ic-textMute">{row.pain}</p>
                         </div>
 
-                        {/* TRANSFORMATION — orange arrow + bold green solution */}
+                        {/* TRANSFORMATION - orange arrow + bold green solution */}
                         <div className="flex items-start gap-2 border-t border-dashed border-ic-border pt-2">
                           <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-ic-orange" />
                           <p className="text-sm font-semibold leading-snug text-ic-greenDeep">{row.change}</p>
@@ -702,17 +795,17 @@ function RetailerDeepDive() {
               </div>
             </div>
 
-            {/* RIGHT — Dallas–Fort Worth Path-Based Dynamic Ads billboard */}
+            {/* RIGHT - Dallas–Fort Worth Path-Based Dynamic Ads billboard */}
             <div className="lg:sticky lg:top-24">
               <div className="overflow-hidden rounded-3xl border-2 border-ic-greenDeep/15 bg-white shadow-md">
                 <img
                   src="/connected-delivery-pitch/dfw-pbda-billboard.png"
-                  alt="Path-Based Dynamic Ads — Kellogg's at HEB and Lay's at Kroger on robot delivery storefronts across the Dallas–Fort Worth metro area"
+                  alt="Path-Based Dynamic Ads - Kellogg's at HEB and Lay's at Kroger on robot delivery storefronts across the Dallas–Fort Worth metro area"
                   className="w-full"
                 />
               </div>
               <p className="mt-3 text-center text-[11px] italic text-ic-textMute">
-                Robots running Dallas–Fort Worth pilot routes — co-branded retailer × consumer-packaged-goods creative, served by Path-Based Dynamic Ads.
+                Robots running Dallas–Fort Worth pilot routes - co-branded retailer × consumer-packaged-goods creative, served by Path-Based Dynamic Ads.
               </p>
             </div>
           </div>
@@ -733,7 +826,7 @@ function RetailerDeepDive() {
         <div className="mt-10">
           <h3 className="text-2xl font-extrabold text-ic-greenDeep">6c · Live retailer dashboard mock</h3>
           <p className="mt-1 max-w-3xl text-sm text-ic-textMute">
-            This is the actual surface a retailer sees. Bound to the calculator above — change a slider and Today's Saved, Bay Utilization, and the 8-week trajectory all update.
+            This is the actual surface a retailer sees. Bound to the calculator above - change a slider and Today's Saved, Bay Utilization, and the 8-week trajectory all update.
           </p>
 
           <p className="mt-1 text-xs italic text-ic-textMute">
@@ -771,17 +864,17 @@ function RetailerDeepDive() {
               <div className="rounded-2xl border-2 border-ic-orange bg-ic-orangeSoft p-5">
                 <div className="text-xs font-bold uppercase tracking-wider text-ic-orange">Design-partner clause</div>
                 <ul className="mt-2 space-y-1.5 text-sm text-ic-greenDeep">
-                  <li>· <strong>Shared economics</strong> — retailer keeps 30 percent or more of Path-Based Dynamic Ads revenue from their own routes</li>
-                  <li>· <strong>Co-developed user experience</strong> — retailer brand on robot, unlock screen, dashboard</li>
-                  <li>· <strong>Exclusivity window</strong> — first 12 months, no competing retailer onboarded in the same Designated Market Area</li>
-                  <li>· <strong>Joint quarterly review</strong> — operating model evolves on real numbers, not assumptions</li>
+                  <li>· <strong>Shared economics</strong> - retailer keeps 30 percent or more of Path-Based Dynamic Ads revenue from their own routes</li>
+                  <li>· <strong>Co-developed user experience</strong> - retailer brand on robot, unlock screen, dashboard</li>
+                  <li>· <strong>Exclusivity window</strong> - first 12 months, no competing retailer onboarded in the same Designated Market Area</li>
+                  <li>· <strong>Joint quarterly review</strong> - operating model evolves on real numbers, not assumptions</li>
                 </ul>
               </div>
               <div className="rounded-2xl border-2 border-ic-greenDeep/15 bg-white p-5">
                 <div className="text-xs font-bold uppercase tracking-wider text-ic-greenDeep">Why this is hard to copy</div>
                 <ul className="mt-2 space-y-1.5 text-sm text-ic-textMute">
                   <li>· Caper Cart Computer-Vision stack (live in production) provides cargo verification that competitors cannot replicate</li>
-                  <li>· 100,000-store retailer relationship base — DoorDash and Amazon must build retailer trust we already have</li>
+                  <li>· 100,000-store retailer relationship base - DoorDash and Amazon must build retailer trust we already have</li>
                   <li>· Path-Based Dynamic Ads economics fund the savings, breaking the linear-cost trap competitors are still subsidizing through</li>
                   <li>· Connected Stores → Robot data loop creates a compounding ad-targeting moat</li>
                 </ul>
@@ -802,7 +895,7 @@ function Solutions() {
     <section id="solutions" className="section-shell">
       <SectionHeader
         eyebrow="06 · Solve"
-        title="Five Levers — One Coordinated Platform Move"
+        title="Five Levers - One Coordinated Platform Move"
         sub="Robots reduce cost (Solution 1). Computer-Vision reuse increases reliability (Solution 2). Path-based ads fund savings (Solution 3). Retailer dashboard captures value (Solution 4). Shopper premium keeps earnings neutral (Solution 5)."
       />
 
@@ -829,7 +922,7 @@ function Solutions() {
             <Pill variant="orange">Patent-pending</Pill>
           </div>
           <p className="mt-3 text-sm text-ic-greenDeep">
-            Micro-zone route targeting combines stock-keeping-unit velocity, point-of-interest and daypart context, and live inventory feed. The robot screen shown above (Kellogg's at HEB, Lay's at Kroger) is exactly this — co-branded retailer × consumer-packaged-goods ads tied to the path the robot is taking.
+            Micro-zone route targeting combines stock-keeping-unit velocity, point-of-interest and daypart context, and live inventory feed. The robot screen shown above (Kellogg's at HEB, Lay's at Kroger) is exactly this - co-branded retailer × consumer-packaged-goods ads tied to the path the robot is taking.
           </p>
           <div className="mt-3 grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl bg-white p-3 ring-1 ring-ic-greenDeep/15">
@@ -850,14 +943,14 @@ function Solutions() {
         </Card>
       </div>
 
-      {/* The Real Moat — flywheel + KPIs + future state */}
+      {/* The Real Moat - flywheel + KPIs + future state */}
       <div className="mt-12">
         <div className="text-xs font-bold uppercase tracking-wider text-ic-orange">The real moat</div>
         <h3 className="mt-1 text-2xl font-extrabold leading-tight text-ic-greenDeep md:text-3xl">
           Competitors deliver packages. We deliver ad-supported commerce.
         </h3>
         <p className="mt-2 max-w-3xl text-sm text-ic-textMute">
-          The Connected Commerce omnichannel loop only closes when robots run paths funded by retailer × consumer-packaged-goods ads. Path-Based Dynamic Ads are the bridge from Connected Stores to Connected Commerce — and the flywheel below doesn't spin without them.
+          The Connected Commerce omnichannel loop only closes when robots run paths funded by retailer × consumer-packaged-goods ads. Path-Based Dynamic Ads are the bridge from Connected Stores to Connected Commerce - and the flywheel below doesn't spin without them.
         </p>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-5">
@@ -904,21 +997,22 @@ function ConnectedCommerceFlywheel() {
     { angle: 210, label: 'New Brand Ad\nDollars', icon: '💰' },
   ]
 
-  // Geometry — all values in viewBox units (0–100), origin at center (50, 50).
+  // Geometry - all values in viewBox units (0–100), origin at center (50, 50).
   // Label boxes are FIXED 100 × 76 px. With the container locked to 560 px wide
   // (max), each pixel maps to 100 / 560 = 0.1786 viewBox units, so the box
   // measures 17.86 × 13.57 in viewBox terms.
   // We pick labelRadius so the inner edge of every box sits the same distance
-  // from the ring — that's what "equidistant from center" really means visually.
+  // from the ring - that's what "equidistant from center" really means visually.
   const cx = 50
   const cy = 50
   const ringRadius = 26 // dotted track
   const arcRadius = 28 // arrow arcs sit just outside the ring
-  const labelRadius = 41 // label-box CENTERS — every box is the same size, so
+  const labelRadius = 41 // label-box CENTERS - every box is the same size, so
   //                       every box edge ends up the same distance from center
   const containerMaxPx = 560
   const boxWpx = 100
   const boxHpx = 76
+  const labelOffsetPx = 0 // shift cards slightly toward upper-left vs ring connectors
 
   return (
     <div className="flex w-full flex-col items-center rounded-3xl border-2 border-ic-greenDeep bg-white p-6 shadow-sm">
@@ -942,7 +1036,7 @@ function ConnectedCommerceFlywheel() {
           {/* Background glow */}
           <circle cx={cx} cy={cy} r={ringRadius + 12} fill="url(#hubGlow)" />
 
-          {/* Flywheel — dashed ring rotating continuously about its own center */}
+          {/* Flywheel - dashed ring rotating continuously about its own center */}
           <circle
             className="cd-flywheel-ring"
             cx={cx}
@@ -980,7 +1074,7 @@ function ConnectedCommerceFlywheel() {
             )
           })}
 
-          {/* Anchor dots ON the dotted ring — precisely at the same radius as the ring */}
+          {/* Anchor dots ON the dotted ring - precisely at the same radius as the ring */}
           {nodes.map((n, i) => {
             const a = (n.angle * Math.PI) / 180
             const x = cx + ringRadius * Math.cos(a)
@@ -1016,15 +1110,21 @@ function ConnectedCommerceFlywheel() {
             )
           })}
 
-          {/* Hub */}
+          {/* Hub - type scaled to sit inside the orange ring (r=10, stroke 0.7) without overlap */}
           <circle cx={cx} cy={cy} r={12.5} fill="#0a4525" />
           <circle cx={cx} cy={cy} r={10} fill="none" stroke="#ff7009" strokeWidth="0.7" />
-          <text x={cx} y={cy - 1.4} textAnchor="middle" fontSize="3.0" fontWeight="800" fill="#ffffff">CONNECTED</text>
-          <text x={cx} y={cy + 2.0} textAnchor="middle" fontSize="3.0" fontWeight="800" fill="#ffffff">COMMERCE</text>
-          <text x={cx} y={cy + 5.7} textAnchor="middle" fontSize="2.0" fontWeight="700" fill="#ff7009">Omnichannel Loop</text>
+          <text x={cx} y={cy - 1.35} textAnchor="middle" fontSize="2.15" fontWeight="800" fill="#ffffff">
+            CONNECTED
+          </text>
+          <text x={cx} y={cy + 1.35} textAnchor="middle" fontSize="2.15" fontWeight="800" fill="#ffffff">
+            COMMERCE
+          </text>
+          <text x={cx} y={cy + 4.35} textAnchor="middle" fontSize="1.45" fontWeight="700" fill="#ff7009">
+            Omnichannel Loop
+          </text>
         </svg>
 
-        {/* HTML label cards — every card is FIXED size, so every box edge sits the
+        {/* HTML label cards - every card is FIXED size, so every box edge sits the
             same distance from the center along its angular axis. The centers all
             sit on a circle of radius labelRadius (% of the square container). */}
         {nodes.map((n, i) => {
@@ -1038,26 +1138,28 @@ function ConnectedCommerceFlywheel() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.45 }}
-              className="absolute -translate-x-1/2 -translate-y-1/2"
+              className="absolute origin-center"
               style={{ left: `${x}%`, top: `${y}%` }}
             >
               <div
-                className="flex flex-col items-center justify-center rounded-xl border-2 border-ic-greenDeep bg-white px-2 py-1 text-center shadow-md"
-                style={{ width: `${boxWpx}px`, height: `${boxHpx}px` }}
+                style={{
+                  transform: `translate(calc(-50% - ${labelOffsetPx}px), calc(-50% - ${labelOffsetPx}px))`,
+                }}
               >
-                <div className="text-lg leading-none">{n.icon}</div>
-                <div className="mt-1 whitespace-pre-line text-[10px] font-bold leading-[1.15] text-ic-greenDeep">
-                  {n.label}
+                <div
+                  className="flex flex-col items-center justify-center rounded-xl border-2 border-ic-greenDeep bg-white px-2 py-1 text-center shadow-md"
+                  style={{ width: `${boxWpx}px`, height: `${boxHpx}px` }}
+                >
+                  <div className="text-lg leading-none">{n.icon}</div>
+                  <div className="mt-1 whitespace-pre-line text-[10px] font-bold leading-[1.15] text-ic-greenDeep">
+                    {n.label}
+                  </div>
                 </div>
               </div>
             </motion.div>
           )
         })}
       </div>
-
-      <p className="mx-auto mt-6 w-full max-w-lg text-center text-[11px] italic text-ic-textMute">
-        Every card is anchored to the same-radius ring; the dashed track rotates continuously and arrows mark flow direction. Robots running ad-funded routes complete the loop competitors can't replicate.
-      </p>
     </div>
   )
 }
@@ -1078,7 +1180,7 @@ function SolutionHead({ icon, id, title, lever }: { icon: React.ReactNode; id: s
 }
 
 // ============================================================
-// 8. Priority — Gantt + RICE
+// 8. Priority - Gantt + RICE
 // ============================================================
 function Priority() {
   return (
@@ -1086,8 +1188,8 @@ function Priority() {
       <div className="section-shell">
         <SectionHeader
           eyebrow="07 · Prioritize"
-          title="Reach × Impact × Confidence ÷ Effort Sequencing — Why Solutions 2 and 4 Ship Before Solution 1, and Solution 3 Activates at Week 6"
-          sub="Confidence and dependency drive the order. Caper Cart Computer-Vision reuse (Solution 2) has the highest confidence per engineer-month. Retailer instrumentation (Solution 4) gates onboarding. Sidewalk fleet (Solution 1) unlocks volume. Path-Based Dynamic Ads (Solution 3) only activate after route stability is proven."
+          title="Why Solutions 2 and 4 Ship Before Solution 1, and Solution 3 Activates at Week 6"
+          sub="Reach × Impact × Confidence ÷ Effort sequencing - confidence and dependency drive the order. Caper Cart Computer-Vision reuse (Solution 2) has the highest confidence per engineer-month. Retailer instrumentation (Solution 4) gates onboarding. Sidewalk fleet (Solution 1) unlocks volume. Path-Based Dynamic Ads (Solution 3) only activate after route stability is proven."
         />
         <div className="mt-8">
           <GanttStrip />
@@ -1106,7 +1208,7 @@ function Journeys() {
       <SectionHeader
         eyebrow="08 · Design"
         title="Journeys Across All Four Sides"
-        sub="Retailer journey is expanded — Storefronts owns onboarding, the operating model, and weekly economics."
+        sub="Retailer journey is expanded - Storefronts owns onboarding, the operating model, and weekly economics."
       />
       <div className="mt-8 space-y-4">
         <Card>
@@ -1148,7 +1250,7 @@ function Stepper({ steps }: { steps: string[] }) {
 }
 
 // ============================================================
-// 10. Metrics — ADCS-Net + success/guardrails + retailer panel
+// 10. Metrics - ADCS-Net + success/guardrails + retailer panel
 // ============================================================
 function Metrics() {
   return (
@@ -1188,7 +1290,7 @@ function Metrics() {
           </Card>
         </div>
 
-        {/* HEALTH METRICS — operational system fitness */}
+        {/* HEALTH METRICS - operational system fitness */}
         <div className="mt-6 rounded-3xl border-2 border-ic-greenDeep bg-white p-6">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-ic-greenDeep" />
@@ -1350,7 +1452,7 @@ function RiskAndPilot() {
             </div>
           </div>
           <div className="mt-4 rounded-xl bg-white p-3 text-xs text-ic-greenDeep ring-1 ring-ic-greenDeep/20">
-            <strong className="text-ic-orange">Autonomy supplements — never replaces — human courier capacity.</strong> 100% fallback at all times.
+            <strong className="text-ic-orange">Autonomy supplements - never replaces - human courier capacity.</strong> 100% fallback at all times.
           </div>
           <p className="mt-3 text-[10px] italic text-ic-greenDeep/70">
             Caveat: pilot investment excludes internal overhead for non-dedicated squads. Estimate held to direct, attributable spend.
@@ -1371,7 +1473,7 @@ function RiskChip({ level }: { level: string }) {
 }
 
 // ============================================================
-// 12. Pilot Plan — DFW
+// 12. Pilot Plan - DFW
 // ============================================================
 function PilotPlan() {
   return (
@@ -1379,7 +1481,7 @@ function PilotPlan() {
       <div className="section-shell">
         <SectionHeader
           eyebrow="11 · Pilot"
-          title={`Dallas–Fort Worth — 90 Days, ${PILOT_STORES} Stores, ${Math.round(PILOT_TOTAL_ORDERS)} Robot Orders`}
+          title={`Dallas–Fort Worth - 90 Days, ${PILOT_STORES} Stores, ${Math.round(PILOT_TOTAL_ORDERS)} Robot Orders`}
           sub="Dallas–Fort Worth is purpose-built for autonomy: Texas Senate Bill 969 permits sidewalk vehicles statewide, suburbs are car-centric with wide sidewalks, climate is forgiving year-round, and we have both Kroger and HEB partnerships in-region."
         />
 
@@ -1388,7 +1490,7 @@ function PilotPlan() {
           <Card>
             <h3 className="flex items-center gap-2 text-lg font-extrabold text-ic-greenDeep"><MapIcon className="h-5 w-5" /> Why Dallas–Fort Worth</h3>
             <ul className="mt-3 space-y-1.5 text-xs text-ic-textMute">
-              <li>· Texas Senate Bill 969 — autonomous sidewalk vehicles permitted statewide</li>
+              <li>· Texas Senate Bill 969 - autonomous sidewalk vehicles permitted statewide</li>
               <li>· Flat terrain, warm climate year-round</li>
               <li>· Kroger plus HEB presence (two partner types)</li>
               <li>· Car-centric suburbs, wide sidewalks (Frisco, McKinney, Plano)</li>
@@ -1475,7 +1577,7 @@ function DecisionRow({ level, criteria, action, color }: { level: string; criter
 }
 
 // ============================================================
-// 13. Wireframes — 5 live mini-interfaces
+// 13. Wireframes - 5 live mini-interfaces
 // ============================================================
 function Wireframes() {
   return (
@@ -1483,7 +1585,7 @@ function Wireframes() {
       <SectionHeader
         eyebrow="12 · Surfaces"
         title="Connected Delivery Across Five Live Interfaces"
-        sub="Five Minimum Viable Product surfaces — Customer Checkout, Customer Tracking, Associate Loading, Retailer Dashboard (compact), Operator Fleet Monitor. Built as live components so the experience is one click from real."
+        sub="Five Minimum Viable Product surfaces - Customer Checkout, Customer Tracking, Associate Loading, Retailer Dashboard (compact), Operator Fleet Monitor. Built as live components so the experience is one click from real."
       />
       <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-5">
         <WfCustomerCheckout />
@@ -1493,7 +1595,7 @@ function Wireframes() {
         <WfOperatorMonitor />
       </div>
 
-      {/* Minimum Viable Product — 3 product surfaces breakdown */}
+      {/* Minimum Viable Product - 3 product surfaces breakdown */}
       <div className="mt-10 rounded-3xl border-2 border-ic-greenDeep/15 bg-white p-6 shadow-sm md:p-8">
         <div className="text-xs font-bold uppercase tracking-wider text-ic-orange">Minimum Viable Product · 3 product surfaces</div>
         <h3 className="mt-1 text-xl font-extrabold text-ic-greenDeep">What ships in the 90-day pilot</h3>

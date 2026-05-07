@@ -8,7 +8,7 @@ export function GanttStrip() {
       <div className="mb-3 flex items-baseline justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-ic-orange">12-week build sequence</p>
-          <h3 className="mt-1 text-lg font-extrabold text-ic-greenDeep">Why Solutions 2 and 4 ship before Solution 1, and Solution 3 activates at week 6</h3>
+          <h3 className="mt-1 text-lg font-extrabold text-ic-greenDeep">What ships when</h3>
         </div>
       </div>
 

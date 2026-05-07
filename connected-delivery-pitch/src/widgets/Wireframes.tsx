@@ -96,7 +96,7 @@ export function WfAssociateLoading() {
   return (
     <Wireframe label="Associate · Loading">
       <div className={WF_FRAME}>
-        <div className="text-center text-sm font-bold text-ic-greenDeep">Load Robot — Bay 2</div>
+        <div className="text-center text-sm font-bold text-ic-greenDeep">Load Robot - Bay 2</div>
         <div className="mt-2 text-[11px] text-ic-textMute">Order #4721 · Compartment A · 12 items · 18.4 pounds</div>
         <ul className="mt-3 space-y-1 text-[11px]">
           {[
@@ -129,7 +129,7 @@ export function WfRetailerDashboard() {
   return (
     <Wireframe label="Retailer · Dashboard">
       <div className={WF_FRAME}>
-        <div className="text-center text-sm font-bold text-ic-greenDeep">Connected Delivery — Kroger Plano</div>
+        <div className="text-center text-sm font-bold text-ic-greenDeep">Connected Delivery - Kroger Plano</div>
         <div className="mt-2 grid grid-cols-2 text-[10px]">
           <div className="text-ic-textMute">Today: <span className="font-bold text-ic-greenDeep">8 orders | $34 saved</span></div>
           <div className="text-right text-ic-textMute">Week: <span className="font-bold text-ic-greenDeep">42 orders | $178 saved</span></div>
@@ -160,7 +160,7 @@ export function WfOperatorMonitor() {
   return (
     <Wireframe label="Operator · Fleet Monitor">
       <div className={WF_FRAME}>
-        <div className="text-center text-sm font-bold text-ic-greenDeep">Fleet Monitor — Dallas–Fort Worth · 12 active</div>
+        <div className="text-center text-sm font-bold text-ic-greenDeep">Fleet Monitor - Dallas–Fort Worth · 12 active</div>
         <div className="mt-2 grid grid-cols-4 gap-1 text-[10px]">
           {['R-01', 'R-02', 'R-03', 'R-04', 'R-05', 'R-06', 'R-07', 'R-08'].map((id) => {
             const alert = id === 'R-03'

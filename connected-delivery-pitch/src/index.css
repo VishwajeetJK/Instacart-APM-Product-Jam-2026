@@ -22,9 +22,9 @@
     @apply m-0 bg-ic-cream font-sans text-ic-text antialiased;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
-  /* Inter with tabular numerals — for any place we want aligned digits.
+  /* Inter with tabular numerals - for any place we want aligned digits.
      We aliased font-mono → Inter in the Tailwind config, so .font-mono
-     here means "Inter with monospaced numerals" — keeping the brand
+     here means "Inter with monospaced numerals" - keeping the brand
      consistent while preserving column alignment in tables. */
   .font-mono {
     font-variant-numeric: tabular-nums;
@@ -32,7 +32,7 @@
   }
 }
 
-/* Connected-Commerce flywheel — slow continuous rotation
+/* Connected-Commerce flywheel - slow continuous rotation
    of the dashed track conveys the "loop" without rotating labels. */
 @keyframes cd-spin {
   from { transform: rotate(0deg); }

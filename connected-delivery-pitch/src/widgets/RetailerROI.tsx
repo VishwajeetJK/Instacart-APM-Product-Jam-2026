@@ -24,7 +24,7 @@ import { Slider, SoftSpring } from '../components/primitives'
 import { ROBOT_CAPEX } from '../data/constants'
 
 // ============================================================
-// Shared state via context — both the calculator and the
+// Shared state via context - both the calculator and the
 // live retailer dashboard read from this so changing a slider
 // updates both panels in real time.
 // ============================================================
@@ -66,7 +66,7 @@ export function RetailerProvider({ children }: { children: ReactNode }) {
 
 function useRetailer() {
   const ctx = useContext(RetailerCtx)
-  if (!ctx) throw new Error('Retailer context missing — wrap in <RetailerProvider>.')
+  if (!ctx) throw new Error('Retailer context missing - wrap in <RetailerProvider>.')
   return ctx
 }
 
@@ -112,7 +112,7 @@ export function RetailerROICalculator() {
           <p className="text-xs font-bold uppercase tracking-wider text-ic-orange">Retailer ROI calculator</p>
           <h3 className="mt-1 text-xl font-extrabold text-ic-greenDeep">Per-Store Annual Economics</h3>
           <p className="mt-1 text-sm text-ic-textMute">
-            Drag any slider — the dashboard on the right and the live retailer mock below both update in real time.
+            Drag any slider - the dashboard on the right and the live retailer mock below both update in real time.
           </p>
         </div>
 
@@ -225,7 +225,7 @@ function BigKPI({
 }
 
 // ============================================================
-// Live Retailer Dashboard (§6c) — bound to same state
+// Live Retailer Dashboard (§6c) - bound to same state
 // ============================================================
 const WEEK_LABELS = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8']
 
@@ -262,7 +262,7 @@ export function LiveRetailerDashboard() {
       <div className="grid gap-5 p-6 md:grid-cols-3">
         {/* KPI strip */}
         <div className="md:col-span-3 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <DashKPI label="This Week — Saved" value={`$${thisWeek.toLocaleString()}`} delta="+12.4 percent versus last week" />
+          <DashKPI label="This Week - Saved" value={`$${thisWeek.toLocaleString()}`} delta="+12.4 percent versus last week" />
           <DashKPI label="Bay Utilization" value={`${(34 + Math.round(r.robotOptInPct * 100))} percent`} delta="Target 40 percent or more" />
           <DashKPI label="Average Load Time" value="3.2 minutes" delta="−0.4 minutes versus Week 1" />
           <DashKPI label="Caper Cart → Robot Continuity" value={fmtPct(RETAILER_CAPER_CONTINUITY_RATE)} delta="+8 points versus Week 1" />

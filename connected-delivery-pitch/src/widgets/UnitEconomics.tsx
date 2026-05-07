@@ -69,7 +69,7 @@ export function UnitEconomics() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      {/* LEFT — Controls */}
+      {/* LEFT - Controls */}
       <div className="space-y-5 rounded-3xl border-2 border-ic-greenDeep/15 bg-white p-6 shadow-sm">
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-ic-orange">Live calculator</p>
@@ -142,11 +142,11 @@ export function UnitEconomics() {
         </div>
       </div>
 
-      {/* RIGHT — Chart */}
+      {/* RIGHT - Chart */}
       <div className="rounded-3xl border-2 border-ic-greenDeep/15 bg-white p-6 shadow-sm">
         <div className="mb-2">
           <p className="text-xs font-bold uppercase tracking-wider text-ic-orange">Sensitivity comparison</p>
-          <h3 className="mt-1 text-xl font-extrabold text-ic-greenDeep">Cost per order — all scenarios</h3>
+          <h3 className="mt-1 text-xl font-extrabold text-ic-greenDeep">Cost per order - all scenarios</h3>
           <p className="mt-1 text-sm text-ic-textMute">Live bar shows your slider state side-by-side with Bear, Base, and Bull.</p>
         </div>
         <div className="h-[300px] w-full">

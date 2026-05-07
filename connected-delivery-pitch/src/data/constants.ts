@@ -7,7 +7,7 @@
  */
 
 // ============================================================
-// COST ECONOMICS — base case from PDF page 3 sensitivity table
+// COST ECONOMICS - base case from PDF page 3 sensitivity table
 // ============================================================
 export const HUMAN_COURIER_COST = 10.10 // 2024 avg per-order delivery cost
 export const ROBOT_TARGET_COST = 4.72 // base-case sidewalk robot at scale
@@ -33,7 +33,7 @@ export const SCENARIOS = [
 ] as const
 
 // ============================================================
-// PILOT FUNNEL — DFW (PDF page 8)
+// PILOT FUNNEL - DFW (PDF page 8)
 // ============================================================
 export const PILOT_ORDERS_PER_STORE_PER_DAY = 50
 export const PILOT_ROBOT_ELIGIBLE_PCT = 0.20 // 20% (weight, distance, no alcohol)
@@ -56,7 +56,7 @@ export const PILOT_INVESTMENT = {
 export const PILOT_INVESTMENT_TOTAL = { low: 780_000, high: 1_170_000 }
 
 // ============================================================
-// AD ECONOMICS — PBDA (PDF p6 + S3 spec)
+// AD ECONOMICS - PBDA (PDF p6 + S3 spec)
 // ============================================================
 export const PBDA_REVENUE_PER_DELIVERY_TARGET = 1.50 // by month 9
 export const INSTACART_AD_REVENUE_2025 = 1_450_000_000
@@ -68,7 +68,7 @@ export const AD_REV_AS_PCT_OF_GTV_CURRENT = 0.029
 export const AD_REV_AS_PCT_OF_GTV_TARGET = 0.045 // mid of 4-5%
 
 // ============================================================
-// RETAILER ECONOMICS — base case for ROI calculator (§6b)
+// RETAILER ECONOMICS - base case for ROI calculator (§6b)
 // Default: PDF pilot baseline numbers.
 // ============================================================
 export const RETAILER_DEFAULTS = {
@@ -108,7 +108,7 @@ export const RETAILER_STORE_COUNT = 100_000
 export const ADVERTISER_BRAND_COUNT = 7000
 
 // ============================================================
-// NORTH STAR — Autonomous Deliveries per Connected Store per Day
+// NORTH STAR - Autonomous Deliveries per Connected Store per Day
 // at or below $4.72 net cost.
 // Trajectory points: PDF + extension.
 // ============================================================
@@ -174,7 +174,7 @@ export const COMPETITORS = [
 ] as const
 
 // ============================================================
-// PILOT STORES — DFW
+// PILOT STORES - DFW
 // ============================================================
 export const PILOT_STORES_LIST = [
   { id: 1, retailer: 'Kroger', address: 'Custer Rd, Plano' },
@@ -192,7 +192,7 @@ export const RICE_SEQUENCE = [
     id: 'Solution 2',
     initiative: 'Caper Cart Computer-Vision Reuse',
     weeks: [0, 4],
-    why: 'High confidence, highest leverage per engineer-month — reuses live intellectual property.',
+    why: 'High confidence, highest leverage per engineer-month - reuses live intellectual property.',
     rice: 'Reach 4.5 · Impact 2 · Confidence 0.95 · Effort 1.5 → score 5.7',
   },
   {
